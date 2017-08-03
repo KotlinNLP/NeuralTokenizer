@@ -28,7 +28,5 @@ fun main(args: Array<String>) {
     epochs = 15,
     shuffler = Shuffler())
 
-  NeuralTokenizerModel(
-    biRNN = tokenizer.charsEncoder.network,
-    sequenceFeedforwardNetwork = tokenizer.boundariesClassifier.network).dump(FileOutputStream(File(modelFilename)))
+  tokenizer.model.dump(FileOutputStream(File(modelFilename)))
 }
