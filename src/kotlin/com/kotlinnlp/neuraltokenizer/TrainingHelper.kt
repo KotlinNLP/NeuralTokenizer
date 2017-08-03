@@ -19,6 +19,11 @@ import kotlin.coroutines.experimental.buildSequence
 class TrainingHelper(val tokenizer: NeuralTokenizer) {
 
   /**
+   * When timing started.
+   */
+  private var startTime: Long = 0
+
+  /**
    * The [NeuralTokenizerOptimizer] of the [tokenizer].
    */
   private val optimizer = NeuralTokenizerOptimizer(this.tokenizer)
@@ -49,7 +54,9 @@ class TrainingHelper(val tokenizer: NeuralTokenizer) {
 
     (0 until epochs).forEach { i ->
 
-      println("Epoch ${i + 1}")
+      println("\nEpoch ${i + 1}")
+
+      this.startTiming()
 
       val mergedSentences = this.mergeSentences(
         sentences = sentences,
@@ -57,6 +64,8 @@ class TrainingHelper(val tokenizer: NeuralTokenizer) {
         shuffler = shuffler)
 
       this.trainEpoch(text = mergedSentences.first, goldClassifications = mergedSentences.second, batchSize = batchSize)
+
+      println("Elapsed time: %s".format(this.formatElapsedTime()))
     }
   }
 
@@ -293,5 +302,23 @@ class TrainingHelper(val tokenizer: NeuralTokenizer) {
       ),
       propagateToInput = true
     )
+  }
+
+  /**
+   * Start registering time.
+   */
+  private fun startTiming() {
+    this.startTime = System.currentTimeMillis()
+  }
+
+  /**
+   * @return the formatted string with elapsed time in seconds and minutes.
+   */
+  private fun formatElapsedTime(): String {
+
+    val elapsedTime = System.currentTimeMillis() - this.startTime
+    val elapsedSecs = elapsedTime / 1000.0
+
+    return "%.3f s (%.1f min)".format(elapsedSecs, elapsedSecs / 60.0)
   }
 }
