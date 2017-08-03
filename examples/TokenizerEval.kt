@@ -43,7 +43,6 @@ fun main(args: Array<String>) {
  */
 private fun buildTokenizer(modelFilename: String) = NeuralTokenizer(
   maxSegmentSize = 50,
-  charEmbeddingsSize = 30,
   model = NeuralTokenizerModel.load(FileInputStream(File(modelFilename))))
 
 /**
