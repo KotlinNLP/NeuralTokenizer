@@ -7,6 +7,9 @@
 
 package com.kotlinnlp.neuraltokenizer
 
+import com.kotlinnlp.simplednn.core.functionalities.activations.Softmax
+import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh
+import com.kotlinnlp.simplednn.core.layers.LayerType
 import com.kotlinnlp.simplednn.deeplearning.birnn.BiRNN
 import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsContainer
 import com.kotlinnlp.simplednn.deeplearning.sequenceencoder.SequenceFeedforwardNetwork
@@ -18,15 +21,9 @@ import java.io.Serializable
 /**
  * The serializable model of a [NeuralTokenizer].
  *
- * @property biRNN the [BiRNN] model of the charsEncoder
- * @property sequenceFeedforwardNetwork the [SequenceFeedforwardNetwork] model of the boundariesEncoder
- * @property embeddings the container of embeddings to associate to each character
+ * @param charEmbeddingsSize the size of each embeddings associated to each character
  */
-data class NeuralTokenizerModel(
-  val biRNN: BiRNN,
-  val sequenceFeedforwardNetwork: SequenceFeedforwardNetwork,
-  val embeddings: EmbeddingsContainer
-) : Serializable {
+class NeuralTokenizerModel(charEmbeddingsSize: Int = 30) : Serializable {
 
   companion object {
 
@@ -45,6 +42,40 @@ data class NeuralTokenizerModel(
      */
     fun load(inputStream: InputStream): NeuralTokenizerModel = Serializer.deserialize(inputStream)
   }
+
+  /**
+   * The max number of embeddings into the container.
+   */
+  private val EMBEDDINGS_COUNT: Int = 1e05.toInt()
+
+  /**
+   * The [BiRNN] model of the charsEncoder.
+   */
+  val biRNN: BiRNN = BiRNN(
+    inputType = LayerType.Input.Dense,
+    inputSize = charEmbeddingsSize,
+    hiddenSize = charEmbeddingsSize,
+    hiddenActivation = Tanh(),
+    recurrentConnectionType = LayerType.Connection.RAN
+  ).initialize()
+
+  /**
+   * The [SequenceFeedforwardNetwork] model of the boundariesEncoder.
+   */
+  val sequenceFeedforwardNetwork = SequenceFeedforwardNetwork(
+    inputType = LayerType.Input.Dense,
+    inputSize = 2 * charEmbeddingsSize,
+    outputSize = 3,
+    outputActivation = Softmax()
+  ).initialize()
+
+  /**
+   * The container of embeddings to associate to each character.
+   */
+  val embeddings = EmbeddingsContainer(
+    count = this.EMBEDDINGS_COUNT,
+    size = charEmbeddingsSize
+  ).randomize()
 
   /**
    * Serialize this [BiRNN] and write it to an output stream.
