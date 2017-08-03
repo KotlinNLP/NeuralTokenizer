@@ -22,8 +22,9 @@ import java.io.Serializable
  * The serializable model of a [NeuralTokenizer].
  *
  * @param charEmbeddingsSize the size of each embeddings associated to each character
+ * @param hiddenSize the size of the hidden arrays (the output of each RNN of the [BiRNN])
  */
-class NeuralTokenizerModel(charEmbeddingsSize: Int = 30) : Serializable {
+class NeuralTokenizerModel(charEmbeddingsSize: Int = 30, hiddenSize: Int = 100) : Serializable {
 
   companion object {
 
@@ -54,7 +55,7 @@ class NeuralTokenizerModel(charEmbeddingsSize: Int = 30) : Serializable {
   val biRNN: BiRNN = BiRNN(
     inputType = LayerType.Input.Dense,
     inputSize = charEmbeddingsSize,
-    hiddenSize = charEmbeddingsSize,
+    hiddenSize = hiddenSize,
     hiddenActivation = Tanh(),
     recurrentConnectionType = LayerType.Connection.RAN
   ).initialize()
@@ -64,7 +65,7 @@ class NeuralTokenizerModel(charEmbeddingsSize: Int = 30) : Serializable {
    */
   val sequenceFeedforwardNetwork = SequenceFeedforwardNetwork(
     inputType = LayerType.Input.Dense,
-    inputSize = 2 * charEmbeddingsSize,
+    inputSize = 2 * hiddenSize,
     outputSize = 3,
     outputActivation = Softmax()
   ).initialize()
