@@ -7,43 +7,18 @@
 
 package com.kotlinnlp.neuraltokenizer
 
-import com.kotlinnlp.simplednn.core.functionalities.activations.Softmax
-import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh
-import com.kotlinnlp.simplednn.core.layers.LayerType
-import com.kotlinnlp.simplednn.deeplearning.birnn.BiRNN
 import com.kotlinnlp.simplednn.deeplearning.birnn.BiRNNEncoder
-import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsContainer
 import com.kotlinnlp.simplednn.deeplearning.sequenceencoder.SequenceFeedforwardEncoder
-import com.kotlinnlp.simplednn.deeplearning.sequenceencoder.SequenceFeedforwardNetwork
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import kotlin.coroutines.experimental.buildSequence
 
 /**
  * Neural Tokenizer.
  *
+ * @property model the model for the sub-networks of this [NeuralTokenizer]
  * @property maxSegmentSize the max size of the segment of text used as buffer
- * @property charEmbeddingsSize the size of each embeddings associated to each character
- * @param model the model for the sub-networks of this [NeuralTokenizer] (by default it's null and a new one is used,
- *              with randomly initialized parameters)
  */
-class NeuralTokenizer(
-  val maxSegmentSize: Int = 100,
-  val charEmbeddingsSize: Int = 30,
-  model: NeuralTokenizerModel? = null
-) {
-
-  /**
-   * The max number of embeddings into the container.
-   */
-  private val EMBEDDINGS_COUNT: Int = 1e05.toInt()
-
-  /**
-   * The model of this [NeuralTokenizer].
-   */
-  val model = model ?: NeuralTokenizerModel(
-    biRNN = this.buildBiRNN(),
-    sequenceFeedforwardNetwork = this.buildSequenceFeedforwardNetwork(),
-    embeddings = this.buildEmbeddings())
+class NeuralTokenizer(val model: NeuralTokenizerModel, val maxSegmentSize: Int = 100) {
 
   /**
    * The [BiRNNEncoder] used to encode the characters of a segment.
@@ -102,35 +77,6 @@ class NeuralTokenizer(
   fun classifyChars(charSequence: CharSequence): Array<DenseNDArray> {
     return this.boundariesClassifier.encode(sequence = this.charsEncoder.encode(this.charsToEmbeddings(charSequence)))
   }
-
-  /**
-   * @return the [BiRNN] model for the [charsEncoder]
-   */
-  private fun buildBiRNN() = BiRNN(
-    inputType = LayerType.Input.Dense,
-    inputSize = this.charEmbeddingsSize,
-    hiddenSize = this.charEmbeddingsSize,
-    hiddenActivation = Tanh(),
-    recurrentConnectionType = LayerType.Connection.RAN
-  ).initialize()
-
-  /**
-   * @return the [SequenceFeedforwardNetwork] model for the [boundariesClassifier]
-   */
-  private fun buildSequenceFeedforwardNetwork() = SequenceFeedforwardNetwork(
-      inputType = LayerType.Input.Dense,
-      inputSize = 2 * this.charEmbeddingsSize,
-      outputSize = 3,
-      outputActivation = Softmax()
-    ).initialize()
-
-  /**
-   * @return the [EmbeddingsContainer] containing embeddings vectors to associate to each character
-   */
-  private fun buildEmbeddings() = EmbeddingsContainer(
-    count = this.EMBEDDINGS_COUNT,
-    size = charEmbeddingsSize
-  ).randomize()
 
   /**
    * Loop over the segments of text.
@@ -270,7 +216,7 @@ class NeuralTokenizer(
   private fun charsToEmbeddings(charSequence: CharSequence): Array<DenseNDArray> = Array(
     size = charSequence.length,
     init = { i ->
-      if (i < this.EMBEDDINGS_COUNT)
+      if (i < this.model.embeddings.count)
         this.model.embeddings.getEmbedding(charSequence[i].toInt()).array.values
       else
         this.model.embeddings.unknownEmbedding.array.values
