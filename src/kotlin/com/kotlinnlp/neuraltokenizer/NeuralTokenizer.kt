@@ -22,7 +22,7 @@ import kotlin.coroutines.experimental.buildSequence
  * Neural Tokenizer.
  *
  * @property maxSegmentSize the max size of the segment of text used as buffer
- * @param charEmbeddingsSize the size of each embeddings associated to each character
+ * @property charEmbeddingsSize the size of each embeddings associated to each character
  * @param model the model for the sub-networks of this [NeuralTokenizer] (by default it's null and a new one is used,
  *              with randomly initialized parameters)
  */
@@ -38,19 +38,12 @@ class NeuralTokenizer(
   private val EMBEDDINGS_COUNT: Int = 1e05.toInt()
 
   /**
-   * The container of embeddings to associate to each character.
-   */
-  val charsEmbeddings = EmbeddingsContainer(
-    count = this.EMBEDDINGS_COUNT,
-    size = charEmbeddingsSize
-  ).randomize()
-
-  /**
    * The model of this [NeuralTokenizer].
    */
   val model = model ?: NeuralTokenizerModel(
     biRNN = this.buildBiRNN(),
-    sequenceFeedforwardNetwork = this.buildSequenceFeedforwardNetwork())
+    sequenceFeedforwardNetwork = this.buildSequenceFeedforwardNetwork(),
+    embeddings = this.buildEmbeddings())
 
   /**
    * The [BiRNNEncoder] used to encode the characters of a segment.
@@ -130,6 +123,14 @@ class NeuralTokenizer(
       outputSize = 3,
       outputActivation = Softmax()
     ).initialize()
+
+  /**
+   * @return the [EmbeddingsContainer] containing embeddings vectors to associate to each character
+   */
+  private fun buildEmbeddings() = EmbeddingsContainer(
+    count = this.EMBEDDINGS_COUNT,
+    size = charEmbeddingsSize
+  ).randomize()
 
   /**
    * Loop over the segments of text.
@@ -270,9 +271,9 @@ class NeuralTokenizer(
     size = charSequence.length,
     init = { i ->
       if (i < this.EMBEDDINGS_COUNT)
-        this.charsEmbeddings.getEmbedding(charSequence[i].toInt()).array.values
+        this.model.embeddings.getEmbedding(charSequence[i].toInt()).array.values
       else
-        this.charsEmbeddings.unknownEmbedding.array.values
+        this.model.embeddings.unknownEmbedding.array.values
     }
   )
 

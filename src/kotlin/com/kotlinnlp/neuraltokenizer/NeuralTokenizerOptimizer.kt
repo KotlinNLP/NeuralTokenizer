@@ -38,7 +38,7 @@ class NeuralTokenizerOptimizer(val tokenizer: NeuralTokenizer) : Optimizer {
    * The Optimizer of the embeddings vectors of the [tokenizer].
    */
   private val embeddingsOptimizer = EmbeddingsOptimizer(
-    embeddingsContainer = this.tokenizer.charsEmbeddings,
+    embeddingsContainer = this.tokenizer.model.embeddings,
     updateMethod = ADAMMethod(stepSize = 0.001))
 
   /**

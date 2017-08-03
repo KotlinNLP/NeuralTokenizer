@@ -8,6 +8,7 @@
 package com.kotlinnlp.neuraltokenizer
 
 import com.kotlinnlp.simplednn.deeplearning.birnn.BiRNN
+import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsContainer
 import com.kotlinnlp.simplednn.deeplearning.sequenceencoder.SequenceFeedforwardNetwork
 import com.kotlinnlp.simplednn.utils.Serializer
 import java.io.InputStream
@@ -17,13 +18,14 @@ import java.io.Serializable
 /**
  * The serializable model of a [NeuralTokenizer].
  *
- * @property biRNN the [BiRNN] model of the charsEncoder of a [NeuralTokenizer]
- * @property sequenceFeedforwardNetwork the [SequenceFeedforwardNetwork] model of the boundariesEncoder of a
- *           [NeuralTokenizer]
+ * @property biRNN the [BiRNN] model of the charsEncoder
+ * @property sequenceFeedforwardNetwork the [SequenceFeedforwardNetwork] model of the boundariesEncoder
+ * @property embeddings the container of embeddings to associate to each character
  */
 data class NeuralTokenizerModel(
   val biRNN: BiRNN,
-  val sequenceFeedforwardNetwork: SequenceFeedforwardNetwork
+  val sequenceFeedforwardNetwork: SequenceFeedforwardNetwork,
+  val embeddings: EmbeddingsContainer
 ) : Serializable {
 
   companion object {
