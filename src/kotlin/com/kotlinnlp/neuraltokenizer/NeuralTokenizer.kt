@@ -249,15 +249,22 @@ class NeuralTokenizer(val model: NeuralTokenizerModel, val maxSegmentSize: Int =
       this.addSentence(endAt = charIndex)
 
     } else {
-      when (charClass) {
-        0 -> this.addToken(endAt = charIndex, isSpace = char.isSpace()) // token boundary follows
-        1 -> { // sequence boundary follows
-          this.addToken(endAt = charIndex, isSpace = char.isSpace())
-          this.addSentence(endAt = charIndex)
+
+      if (char.isSpace()) { // automatically split tokens if a space has not been recognised as boundary
+        this.forceBufferSplitAtSpace(char = char, charIndex = charIndex)
+        this.addToken(endAt = charIndex, isSpace = true)
+
+        if (charClass == 1) { // sequence boundary follows
+            this.addSentence(endAt = charIndex)
         }
-        2 -> if (char.isSpace()) { // automatically split tokens if a space has not been recognised as boundary
-          this.forceBufferSplitAtSpace(char = char, charIndex = charIndex)
-          this.addToken(endAt = charIndex, isSpace = true)
+
+      } else {
+        when (charClass) {
+          0 -> this.addToken(endAt = charIndex, isSpace = char.isSpace()) // token boundary follows
+          1 -> { // sequence boundary follows
+            this.addToken(endAt = charIndex, isSpace = char.isSpace())
+            this.addSentence(endAt = charIndex)
+          }
         }
       }
     }
