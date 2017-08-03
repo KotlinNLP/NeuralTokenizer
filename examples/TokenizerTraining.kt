@@ -19,7 +19,9 @@ fun main(args: Array<String>) {
   val trainingSet = readDataset(args[0])
   val modelFilename = args[1]
 
-  val tokenizer = NeuralTokenizer(model = NeuralTokenizerModel(charEmbeddingsSize = 30), maxSegmentSize = 50)
+  val tokenizer = NeuralTokenizer(
+    model = NeuralTokenizerModel(charEmbeddingsSize = 30, hiddenSize = 100),
+    maxSegmentSize = 50)
 
   TrainingHelper(tokenizer).train(
     sentences = trainingSet.first,
