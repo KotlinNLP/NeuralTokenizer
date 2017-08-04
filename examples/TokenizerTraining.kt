@@ -6,6 +6,7 @@
  * ------------------------------------------------------------------*/
 
 import com.kotlinnlp.neuraltokenizer.*
+import com.kotlinnlp.neuraltokenizer.helpers.TrainingHelper
 import com.kotlinnlp.simplednn.dataset.Shuffler
 import java.io.File
 import java.io.FileOutputStream

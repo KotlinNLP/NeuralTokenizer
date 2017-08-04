@@ -6,6 +6,7 @@
  * ------------------------------------------------------------------*/
 
 import com.kotlinnlp.neuraltokenizer.*
+import com.kotlinnlp.neuraltokenizer.helpers.ValidationHelper
 import java.io.File
 import java.io.FileInputStream
 
