@@ -5,11 +5,11 @@
  * file, you can obtain one at http://mozilla.org/MPL/2.0/.
  * ------------------------------------------------------------------*/
 
-package com.kotlinnlp.neuraltokenizer
+package com.kotlinnlp.neuraltokenizer.helpers
 
 import com.kotlinnlp.conllio.CoNLLUEvaluator
 import com.kotlinnlp.conllio.CoNLLWriter
-
+import com.kotlinnlp.neuraltokenizer.*
 
 /**
  * A helper for the validation of a [NeuralTokenizer].
