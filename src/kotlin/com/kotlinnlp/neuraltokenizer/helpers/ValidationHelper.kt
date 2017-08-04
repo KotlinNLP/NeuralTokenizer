@@ -10,6 +10,7 @@ package com.kotlinnlp.neuraltokenizer.helpers
 import com.kotlinnlp.conllio.CoNLLUEvaluator
 import com.kotlinnlp.conllio.CoNLLWriter
 import com.kotlinnlp.neuraltokenizer.*
+import com.kotlinnlp.neuraltokenizer.utils.*
 
 /**
  * A helper for the validation of a [NeuralTokenizer].

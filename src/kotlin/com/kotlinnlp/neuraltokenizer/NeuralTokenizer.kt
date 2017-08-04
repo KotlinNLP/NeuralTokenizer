@@ -7,6 +7,7 @@
 
 package com.kotlinnlp.neuraltokenizer
 
+import com.kotlinnlp.neuraltokenizer.utils.isSpace
 import com.kotlinnlp.simplednn.deeplearning.birnn.BiRNNEncoder
 import com.kotlinnlp.simplednn.deeplearning.sequenceencoder.SequenceFeedforwardEncoder
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray

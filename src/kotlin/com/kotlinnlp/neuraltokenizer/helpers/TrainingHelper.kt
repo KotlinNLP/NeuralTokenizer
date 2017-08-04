@@ -8,6 +8,7 @@
 package com.kotlinnlp.neuraltokenizer.helpers
 
 import com.kotlinnlp.neuraltokenizer.*
+import com.kotlinnlp.neuraltokenizer.utils.*
 import com.kotlinnlp.simplednn.dataset.Shuffler
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import com.kotlinnlp.simplednn.utils.progressindicator.ProgressIndicatorBar
