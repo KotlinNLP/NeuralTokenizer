@@ -11,22 +11,25 @@ import java.io.File
 import java.io.FileOutputStream
 
 /**
- * Execute a training of a [NeuralTokenizer] over the training set read from the file given as first argument and save
- * its model into the file given as second argument.
+ * Execute a training of a [NeuralTokenizer] over the training set read from the file given as second argument and save
+ * its model into the file given as first argument.
+ * If a third filename argument is given, the tokenizer is validated after each epoch over the dataset read from the
+ * given file.
  */
 fun main(args: Array<String>) {
 
-  val modelFilename = args[1]
+  val modelFilename = args[0]
 
   val tokenizer = NeuralTokenizer(
     model = NeuralTokenizerModel(charEmbeddingsSize = 30, hiddenSize = 100),
     maxSegmentSize = 50)
 
   TrainingHelper(tokenizer).train(
-    trainingSet = readDataset(args[0]),
+    trainingSet = readDataset(args[1]),
     batchSize = 100,
     epochs = 15,
-    shuffler = Shuffler())
+    shuffler = Shuffler(),
+    validationSet = if (args.size > 2) readDataset(args[2]) else null)
 
   tokenizer.model.dump(FileOutputStream(File(modelFilename)))
 }
