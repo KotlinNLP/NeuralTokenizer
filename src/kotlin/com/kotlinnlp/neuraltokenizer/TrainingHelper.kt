@@ -28,6 +28,11 @@ class TrainingHelper(val tokenizer: NeuralTokenizer) {
   private val optimizer = NeuralTokenizerOptimizer(this.tokenizer)
 
   /**
+   * The [ValidationHelper] used to validate each epoch when a not null validation dataset is passed.
+   */
+  private val validationHelper = ValidationHelper(this.tokenizer)
+
+  /**
    * The gold classification of the current segment.
    */
   lateinit private var segmentGoldClassification: ArrayList<Int>
@@ -38,11 +43,13 @@ class TrainingHelper(val tokenizer: NeuralTokenizer) {
    * @param trainingSet the [Dataset] to train the [tokenizer]
    * @param batchSize the size of the training batches (default 1)
    * @param epochs number of epochs
+   * @param validationSet the [Dataset] used to validate each epoch (default null)
    * @param shuffler the [Shuffler] to shuffle the training sentences before each epoch (default null)
    */
   fun train(trainingSet: Dataset,
             batchSize: Int = 1,
             epochs: Int = 3,
+            validationSet: Dataset? = null,
             shuffler: Shuffler? = null) {
 
     println("-- START TRAINING OVER %d SENTENCES".format(trainingSet.size))
@@ -58,6 +65,8 @@ class TrainingHelper(val tokenizer: NeuralTokenizer) {
       )
 
       this.trainEpoch(text = mergedSentences.first, goldClassifications = mergedSentences.second, batchSize = batchSize)
+
+      validationSet ?: this.validateEpoch(validationSet!!)
 
       println("Elapsed time: %s".format(this.formatElapsedTime()))
     }
@@ -235,6 +244,23 @@ class TrainingHelper(val tokenizer: NeuralTokenizer) {
       ),
       propagateToInput = true
     )
+  }
+
+  /**
+   * @param validationSet the validation dataset used to validate the [tokenizer]
+   */
+  private fun validateEpoch(validationSet: Dataset) {
+
+    println("Epoch validation over %d sentences".format(validationSet.size))
+
+    val stats: ValidationHelper.EvaluationStats = this.validationHelper.validate(validationSet)
+
+    println("Tokens accuracy     ->   Precision: %.2f%%  |  Recall: %.2f%%  |  F1 Score: %.2f%%"
+      .format(100.0 * stats.tokens.precision, 100.0 * stats.tokens.recall, 100.0 * stats.tokens.f1Score))
+
+    println("Sentences accuracy  ->   Precision: %.2f%%  |  Recall: %.2f%%  |  F1 Score: %.2f%%"
+      .format(100.0 * stats.sentences.precision, 100.0 * stats.sentences.recall, 100.0 * stats.sentences.f1Score))
+
   }
 
   /**
