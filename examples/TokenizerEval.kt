@@ -7,6 +7,7 @@
 
 import com.kotlinnlp.neuraltokenizer.*
 import com.kotlinnlp.neuraltokenizer.helpers.ValidationHelper
+import com.kotlinnlp.neuraltokenizer.utils.readDataset
 import java.io.File
 import java.io.FileInputStream
 
