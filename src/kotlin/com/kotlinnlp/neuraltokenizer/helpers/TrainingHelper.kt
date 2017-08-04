@@ -88,6 +88,8 @@ class TrainingHelper(
 
     var examplesCount: Int = 0
 
+    this.optimizer.newEpoch()
+
     this.loopSegments(text = text, goldClassifications = goldClassifications).forEach { (startIndex, endIndex) ->
 
       examplesCount++
