@@ -7,6 +7,8 @@
 
 package com.kotlinnlp.neuraltokenizer
 
+import com.kotlinnlp.simplednn.core.functionalities.updatemethods.UpdateMethod
+import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGradMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
 import com.kotlinnlp.simplednn.core.optimizer.Optimizer
 import com.kotlinnlp.simplednn.core.optimizer.ParamsOptimizer
@@ -17,29 +19,37 @@ import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsOptimizer
  * The Optimizer of the sub-networks of the [NeuralTokenizer].
  *
  * @property tokenizer the [NeuralTokenizer] to optimize
+ * @param charsEncoderUpdateMethod the update method for the charsEncoder (ADAM is default)
+ * @param boundariesClassifierUpdateMethod the update method for the boundariesClassifier (ADAM is default)
+ * @param embeddingsUpdateMethod the update method for the embeddings (AdaGrad is default)
  */
-class NeuralTokenizerOptimizer(val tokenizer: NeuralTokenizer) : Optimizer {
+class NeuralTokenizerOptimizer(
+  val tokenizer: NeuralTokenizer,
+  charsEncoderUpdateMethod: UpdateMethod = ADAMMethod(stepSize = 0.001),
+  boundariesClassifierUpdateMethod: UpdateMethod = ADAMMethod(stepSize = 0.001),
+  embeddingsUpdateMethod: UpdateMethod = AdaGradMethod(learningRate = 0.01)
+) : Optimizer {
 
   /**
    * The Optimizer of the charsEncoder of the [tokenizer].
    */
   private val charsEncoderOptimizer = BiRNNOptimizer(
     network = this.tokenizer.charsEncoder.network,
-    updateMethod = ADAMMethod(stepSize = 0.001))
+    updateMethod = charsEncoderUpdateMethod)
 
   /**
    * The Optimizer of the boundariesClassifier of the [tokenizer].
    */
   private val boundariesClassifierOptimizer = ParamsOptimizer(
     neuralNetwork = this.tokenizer.boundariesClassifier.network.network,
-    updateMethod = ADAMMethod(stepSize = 0.001))
+    updateMethod = boundariesClassifierUpdateMethod)
 
   /**
    * The Optimizer of the embeddings vectors of the [tokenizer].
    */
   private val embeddingsOptimizer = EmbeddingsOptimizer(
     embeddingsContainer = this.tokenizer.model.embeddings,
-    updateMethod = ADAMMethod(stepSize = 0.001))
+    updateMethod = embeddingsUpdateMethod)
 
   /**
    * Update the parameters of the neural element associated to this optimizer.
