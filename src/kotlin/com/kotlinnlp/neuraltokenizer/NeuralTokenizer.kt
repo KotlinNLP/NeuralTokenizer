@@ -234,59 +234,28 @@ class NeuralTokenizer(val model: NeuralTokenizerModel, val maxSegmentSize: Int =
    */
   private fun processChar(char: Char, charIndex: Int, charClass: Int, isLast: Boolean) {
 
+    val isSpacingChar: Boolean = char.isSpace()
+
+    if (isSpacingChar && this.curTokenBuffer.isNotEmpty()) { // automatically add the previously buffered token
+      this.addToken(endAt = charIndex - 1, isSpace = false)
+    }
+
     this.curTokenBuffer.append(char)
     this.curSentenceBuffer.append(char)
 
     if (isLast) {
-
-      if (char.isSpace()) {
-        this.forceBufferSplitAtSpace(char = char, charIndex = charIndex)
-        this.addToken(endAt = charIndex, isSpace = true)
-
-      } else {
-        this.addToken(endAt = charIndex, isSpace = false)
-      }
-
+      this.addToken(endAt = charIndex, isSpace = isSpacingChar)
       this.addSentence(endAt = charIndex)
 
     } else {
-
-      if (char.isSpace()) { // automatically split tokens if a space has not been recognised as boundary
-        this.forceBufferSplitAtSpace(char = char, charIndex = charIndex)
-        this.addToken(endAt = charIndex, isSpace = true)
-
-        if (charClass == 1) { // sequence boundary follows
-            this.addSentence(endAt = charIndex)
+      when (charClass) {
+        0 -> this.addToken(endAt = charIndex, isSpace = isSpacingChar) // token boundary follows
+        1 -> { // sequence boundary follows
+          this.addToken(endAt = charIndex, isSpace = isSpacingChar)
+          this.addSentence(endAt = charIndex)
         }
-
-      } else {
-        when (charClass) {
-          0 -> this.addToken(endAt = charIndex, isSpace = char.isSpace()) // token boundary follows
-          1 -> { // sequence boundary follows
-            this.addToken(endAt = charIndex, isSpace = char.isSpace())
-            this.addSentence(endAt = charIndex)
-          }
-        }
+        2 -> if (isSpacingChar) this.addToken(endAt = charIndex, isSpace = true)
       }
-    }
-  }
-
-  /**
-   * Force the end of the previously buffered token if the current [char] is a space.
-   * Remove the spacing [char] from the token buffer, add the token and restore the space into the buffer.
-   *
-   * @param char the char to process
-   * @param charIndex the index of the [char] within the text
-   */
-  private fun forceBufferSplitAtSpace(char: Char, charIndex: Int) {
-
-    if (this.curTokenBuffer.length > 1) {
-
-      this.curTokenBuffer.delete(this.curTokenBuffer.lastIndex, this.curTokenBuffer.length)
-
-      this.addToken(endAt = charIndex - 1, isSpace = false)
-
-      this.curTokenBuffer.append(char)
     }
   }
 
