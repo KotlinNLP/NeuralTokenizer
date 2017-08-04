@@ -10,18 +10,18 @@ import java.io.File
 import java.io.FileInputStream
 
 /**
- * Execute an evaluation of a [NeuralTokenizer] over the test set read from the file given as first argument.
- * The model of the tokenizer is read from the serialized file given as second argument.
+ * Execute an evaluation of a [NeuralTokenizer] over the test set read from the file given as second argument.
+ * The model of the tokenizer is read from the serialized file given as first argument.
  */
 fun main(args: Array<String>) {
 
   println("Reading dataset...")
 
-  val testSet = readDataset(args[0])
+  val testSet = readDataset(args[1])
 
   val tokenizer = NeuralTokenizer(
     maxSegmentSize = 50,
-    model = NeuralTokenizerModel.load(FileInputStream(File(args[1]))))
+    model = NeuralTokenizerModel.load(FileInputStream(File(args[0]))))
 
   println("\n-- START VALIDATION OVER %d TEST SENTENCES".format(testSet.size))
 
