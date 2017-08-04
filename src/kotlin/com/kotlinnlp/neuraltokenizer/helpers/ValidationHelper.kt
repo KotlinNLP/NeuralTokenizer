@@ -77,7 +77,11 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
     println("Elapsed time: %s".format(this.formatElapsedTime()))
 
     if (evaluation != null) {
-      return this.extractStats(conllEvaluation = evaluation)
+      try {
+        return this.extractStats(conllEvaluation = evaluation)
+      } catch (e: RuntimeException) {
+        throw RuntimeException("Invalid output of the CoNLL evaluation script: $evaluation")
+      }
 
     } else {
       throw RuntimeException("CoNLL evaluation script gave an error")
