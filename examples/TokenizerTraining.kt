@@ -16,7 +16,6 @@ import java.io.FileOutputStream
  */
 fun main(args: Array<String>) {
 
-  val trainingSet = readDataset(args[0])
   val modelFilename = args[1]
 
   val tokenizer = NeuralTokenizer(
@@ -24,8 +23,7 @@ fun main(args: Array<String>) {
     maxSegmentSize = 50)
 
   TrainingHelper(tokenizer).train(
-    sentences = trainingSet.first,
-    goldClassifications = trainingSet.second,
+    trainingSet = readDataset(args[0]),
     batchSize = 100,
     epochs = 15,
     shuffler = Shuffler())
