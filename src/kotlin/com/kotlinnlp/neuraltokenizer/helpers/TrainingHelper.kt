@@ -16,18 +16,19 @@ import kotlin.coroutines.experimental.buildSequence
 
 /**
  * A helper for the training of a [NeuralTokenizer].
+ *
+ * @property tokenizer the [NeuralTokenizer] to train
+ * @property optimizer the [NeuralTokenizerOptimizer] of the [tokenizer]
  */
-class TrainingHelper(val tokenizer: NeuralTokenizer) {
+class TrainingHelper(
+  val tokenizer: NeuralTokenizer,
+  val optimizer: NeuralTokenizerOptimizer = NeuralTokenizerOptimizer(tokenizer)
+) {
 
   /**
    * When timing started.
    */
   private var startTime: Long = 0
-
-  /**
-   * The [NeuralTokenizerOptimizer] of the [tokenizer].
-   */
-  private val optimizer = NeuralTokenizerOptimizer(this.tokenizer)
 
   /**
    * The [ValidationHelper] used to validate each epoch when a not null validation dataset is passed.
