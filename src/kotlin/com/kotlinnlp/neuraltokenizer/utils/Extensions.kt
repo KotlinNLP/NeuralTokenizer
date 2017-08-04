@@ -5,9 +5,11 @@
  * file, you can obtain one at http://mozilla.org/MPL/2.0/.
  * ------------------------------------------------------------------*/
 
-package com.kotlinnlp.neuraltokenizer
+package com.kotlinnlp.neuraltokenizer.utils
 
 import com.kotlinnlp.conllio.Token.InvalidTokenForm
+import com.kotlinnlp.neuraltokenizer.Sentence
+import com.kotlinnlp.neuraltokenizer.Token
 
 typealias CoNLLSentence = com.kotlinnlp.conllio.Sentence
 typealias CoNLLToken = com.kotlinnlp.conllio.Token
