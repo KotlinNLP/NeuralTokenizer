@@ -141,11 +141,6 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
   }
 
   /**
-   * @return a Boolean indicating if this Char is a spacing character.
-   */
-  private fun Char.isSpace(): Boolean = Regex("\\s|\\t|\\n|\\r").containsMatchIn(this.toString())
-
-  /**
    * @param conllEvaluation the evaluation string given by the CoNLL evaluation script
    *
    * @return CoNLL statistics for Tokens and Sentences

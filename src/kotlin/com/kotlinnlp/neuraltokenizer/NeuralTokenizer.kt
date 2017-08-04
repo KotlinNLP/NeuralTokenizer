@@ -369,9 +369,4 @@ class NeuralTokenizer(val model: NeuralTokenizerModel, val maxSegmentSize: Int =
     this.curSentenceBuffer.setLength(0)
     this.curSentenceTokens = ArrayList<Token>()
   }
-
-  /**
-   * @return a Boolean indicating if this Char is a spacing character.
-   */
-  private fun Char.isSpace(): Boolean = Regex("\\s|\\t|\\n|\\r").containsMatchIn(this.toString())
 }
