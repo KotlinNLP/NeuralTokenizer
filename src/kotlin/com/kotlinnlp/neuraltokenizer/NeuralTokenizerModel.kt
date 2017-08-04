@@ -23,8 +23,13 @@ import java.io.Serializable
  *
  * @param charEmbeddingsSize the size of each embeddings associated to each character
  * @param hiddenSize the size of the hidden arrays (the output of each RNN of the [BiRNN])
+ * @param hiddenConnectionType the recurrent connection type of the [BiRNN] (RAN is default)
  */
-class NeuralTokenizerModel(charEmbeddingsSize: Int = 30, hiddenSize: Int = 100) : Serializable {
+class NeuralTokenizerModel(
+  charEmbeddingsSize: Int = 30,
+  hiddenSize: Int = 100,
+  hiddenConnectionType: LayerType.Connection = LayerType.Connection.RAN
+) : Serializable {
 
   companion object {
 
@@ -57,7 +62,7 @@ class NeuralTokenizerModel(charEmbeddingsSize: Int = 30, hiddenSize: Int = 100) 
     inputSize = charEmbeddingsSize,
     hiddenSize = hiddenSize,
     hiddenActivation = Tanh(),
-    recurrentConnectionType = LayerType.Connection.RAN
+    recurrentConnectionType = hiddenConnectionType
   ).initialize()
 
   /**
