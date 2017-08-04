@@ -8,7 +8,6 @@
 package com.kotlinnlp.neuraltokenizer
 
 import com.kotlinnlp.simplednn.dataset.Shuffler
-import com.kotlinnlp.simplednn.helpers.training.utils.ExamplesIndices
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import com.kotlinnlp.simplednn.utils.progressindicator.ProgressIndicatorBar
 import kotlin.coroutines.experimental.buildSequence
@@ -34,23 +33,19 @@ class TrainingHelper(val tokenizer: NeuralTokenizer) {
   lateinit private var segmentGoldClassification: ArrayList<Int>
 
   /**
-   * Train the [tokenizer] using the [goldClassifications] as reference of correct predictions.
+   * Train the [tokenizer] using the chars classifications of the [trainingSet] as reference of correct predictions.
    *
-   * @param sentences the text to tokenize, as list of sentences
-   * @param goldClassifications a list containing the correct classifications of the chars of each sentence
+   * @param trainingSet the [Dataset] to train the [tokenizer]
    * @param batchSize the size of the training batches (default 1)
    * @param epochs number of epochs
    * @param shuffler the [Shuffler] to shuffle the training sentences before each epoch (default null)
    */
-  fun train(sentences: ArrayList<String>,
-            goldClassifications: ArrayList<ArrayList<Int>>,
+  fun train(trainingSet: Dataset,
             batchSize: Int = 1,
             epochs: Int = 3,
             shuffler: Shuffler? = null) {
 
-    require(sentences.size == goldClassifications.size)
-
-    println("-- START TRAINING OVER %d SENTENCES".format(sentences.size))
+    println("-- START TRAINING OVER %d SENTENCES".format(trainingSet.size))
 
     (0 until epochs).forEach { i ->
 
@@ -58,76 +53,14 @@ class TrainingHelper(val tokenizer: NeuralTokenizer) {
 
       this.startTiming()
 
-      val mergedSentences = this.mergeSentences(
-        sentences = sentences,
-        goldClassifications = goldClassifications,
-        shuffler = shuffler)
+      val mergedSentences = mergeDataset(
+        dataset = if (shuffler != null) shuffleDataset(dataset = trainingSet, shuffler = shuffler) else trainingSet
+      )
 
       this.trainEpoch(text = mergedSentences.first, goldClassifications = mergedSentences.second, batchSize = batchSize)
 
       println("Elapsed time: %s".format(this.formatElapsedTime()))
     }
-  }
-
-  /**
-   * Merge the training sentences into a unique sentences, with the classifications of its chars, shuffling the sentences
-   * eventually.
-   *
-   * @param sentences the list of sentences
-   * @param goldClassifications a list containing the correct classifications of the chars of each sentence
-   * @param shuffler the [Shuffler] to shuffle the training sentences (default null)
-   *
-   * @return a Pair containing the full text and the corresponding gold classifications
-   */
-  private fun mergeSentences(sentences: ArrayList<String>,
-                             goldClassifications: ArrayList<ArrayList<Int>>,
-                             shuffler: Shuffler?): Pair<String, ArrayList<Int>> {
-
-    val fullText: String
-    val fullClassifications = ArrayList<Int>()
-
-    if (shuffler != null) {
-
-      val shuffledSentences = this.shuffleSentences(
-        sentences = sentences,
-        goldClassifications = goldClassifications,
-        shuffler = shuffler)
-
-      fullText = shuffledSentences.first.joinToString("")
-      shuffledSentences.second.forEach { classifications -> classifications.forEach { fullClassifications.add(it) } }
-
-    } else {
-      fullText = sentences.joinToString("")
-      goldClassifications.forEach { classifications -> classifications.forEach { fullClassifications.add(it) } }
-    }
-
-    return Pair(fullText, fullClassifications)
-  }
-
-  /**
-   * Shuffle the training sentences.
-   *
-   * @param sentences the list of sentences
-   * @param goldClassifications a list containing the correct classifications of the chars of each sentence
-   * @param shuffler the [Shuffler] to shuffle the training sentences
-   *
-   * @return a Pair containing the shuffled sentences and the corresponding gold classifications of their chars
-   */
-  private fun shuffleSentences(sentences: ArrayList<String>,
-                               goldClassifications: ArrayList<ArrayList<Int>>,
-                               shuffler: Shuffler): Pair<ArrayList<String>, ArrayList<ArrayList<Int>>> {
-
-    val exampleIndices = ExamplesIndices(size = sentences.size, shuffler = shuffler)
-
-    val shuffledSentences = arrayListOf<String>()
-    val shuffledClassifications = arrayListOf<ArrayList<Int>>()
-
-    exampleIndices.forEach { i ->
-      shuffledSentences.add(sentences[i])
-      shuffledClassifications.add(goldClassifications[i])
-    }
-
-    return Pair(shuffledSentences, shuffledClassifications)
   }
 
   /**
