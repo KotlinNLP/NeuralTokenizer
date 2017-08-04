@@ -68,9 +68,9 @@ class TrainingHelper(val tokenizer: NeuralTokenizer) {
 
       this.trainEpoch(text = mergedSentences.first, goldClassifications = mergedSentences.second, batchSize = batchSize)
 
-      if (validationSet != null) this.validateEpoch(validationSet)
-
       println("Elapsed time: %s".format(this.formatElapsedTime()))
+
+      if (validationSet != null) this.validateEpoch(validationSet)
     }
   }
 
