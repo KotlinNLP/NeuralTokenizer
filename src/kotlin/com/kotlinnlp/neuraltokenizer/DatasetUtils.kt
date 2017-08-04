@@ -11,6 +11,11 @@ typealias AnnotatedSentence = Pair<String, CharsClassification>
 typealias Dataset = ArrayList<AnnotatedSentence>
 
 /**
+ * InvalidDataset Exception.
+ */
+class InvalidDataset(message: String) : RuntimeException(message)
+
+/**
  * Read a dataset from a JSON file.
  *
  * JSON file format:
@@ -62,6 +67,10 @@ fun mergeDataset(dataset: Dataset): Pair<String, CharsClassification> {
   val fullClassifications = ArrayList<Int>()
 
   dataset.forEach { (sentence, charsClassification) ->
+
+    if (sentence.length != charsClassification.size)
+      throw InvalidDataset("Sentence and chars classification have different lengths")
+
     fullText.append(sentence)
     charsClassification.forEach { fullClassifications.add(it) }
   }
