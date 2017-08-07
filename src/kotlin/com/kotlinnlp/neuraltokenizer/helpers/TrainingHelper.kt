@@ -12,6 +12,8 @@ import com.kotlinnlp.neuraltokenizer.utils.*
 import com.kotlinnlp.simplednn.dataset.Shuffler
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import com.kotlinnlp.simplednn.utils.progressindicator.ProgressIndicatorBar
+import java.io.File
+import java.io.FileOutputStream
 import kotlin.coroutines.experimental.buildSequence
 
 /**
@@ -36,6 +38,16 @@ class TrainingHelper(
   private val validationHelper = ValidationHelper(this.tokenizer)
 
   /**
+   * The accuracy in terms of the tokens, accumulated during the training epochs.
+   */
+  private var tokensAccumulatedAccuracy: Double = 0.0
+
+  /**
+   * The accuracy in terms of the sentences, accumulated during the training epochs.
+   */
+  private var sentencesAccumulatedAccuracy: Double = 0.0
+
+  /**
    * The gold classification of the current segment.
    */
   lateinit private var segmentGoldClassification: ArrayList<Int>
@@ -48,14 +60,19 @@ class TrainingHelper(
    * @param epochs number of epochs
    * @param validationSet the [Dataset] used to validate each epoch (default null)
    * @param shuffler the [Shuffler] to shuffle the training sentences before each epoch (default null)
+   * @param modelFilename the name of the file in which to save the best trained model
    */
   fun train(trainingSet: Dataset,
             batchSize: Int = 1,
             epochs: Int = 3,
             validationSet: Dataset? = null,
-            shuffler: Shuffler? = null) {
+            shuffler: Shuffler? = null,
+            modelFilename: String? = null) {
 
     println("-- START TRAINING OVER %d SENTENCES".format(trainingSet.size))
+
+    var bestAccuracy: Double = 0.0
+    this.resetValidationStats()
 
     (0 until epochs).forEach { i ->
 
@@ -64,14 +81,20 @@ class TrainingHelper(
       this.startTiming()
 
       val mergedSentences = mergeDataset(
-        dataset = if (shuffler != null) shuffleDataset(dataset = trainingSet, shuffler = shuffler) else trainingSet
-      )
+        dataset = if (shuffler != null) shuffleDataset(dataset = trainingSet, shuffler = shuffler) else trainingSet)
 
       this.trainEpoch(text = mergedSentences.first, goldClassifications = mergedSentences.second, batchSize = batchSize)
 
       println("Elapsed time: %s".format(this.formatElapsedTime()))
 
-      if (validationSet != null) this.validateEpoch(validationSet)
+      if (validationSet != null) {
+        val accuracy = this.validateEpoch(validationSet)
+
+        if (modelFilename != null && accuracy > bestAccuracy) {
+          bestAccuracy = accuracy
+          this.tokenizer.model.dump(FileOutputStream(File(modelFilename)))
+        }
+      }
     }
   }
 
@@ -252,9 +275,13 @@ class TrainingHelper(
   }
 
   /**
+   * Validate the [tokenizer] after trained it over an epoch.
+   *
    * @param validationSet the validation dataset used to validate the [tokenizer]
+   *
+   * @return the current accuracy of the [tokenizer]
    */
-  private fun validateEpoch(validationSet: Dataset) {
+  private fun validateEpoch(validationSet: Dataset): Double {
 
     println("Epoch validation over %d sentences".format(validationSet.size))
 
@@ -266,6 +293,44 @@ class TrainingHelper(
     println("Sentences accuracy  ->   Precision: %.2f%%  |  Recall: %.2f%%  |  F1 Score: %.2f%%"
       .format(100.0 * stats.sentences.precision, 100.0 * stats.sentences.recall, 100.0 * stats.sentences.f1Score))
 
+    this.registerValidationStats(stats)
+
+    return this.getAccuracy(stats)
+  }
+
+  /**
+   * Register the given [stats] to trace the change of speed of each parameter (tokens and sentences).
+   *
+   * @param stats the validation statistics given by the [ValidationHelper]
+   */
+  private fun registerValidationStats(stats: ValidationHelper.EvaluationStats) {
+
+    this.tokensAccumulatedAccuracy += stats.tokens.f1Score
+    this.sentencesAccumulatedAccuracy += stats.sentences.f1Score
+  }
+
+  /**
+   * Reset the accumulated stats obtained with the previous validations.
+   */
+  private fun resetValidationStats() {
+
+    this.tokensAccumulatedAccuracy = 0.0
+    this.tokensAccumulatedAccuracy = 0.0
+  }
+
+  /**
+   * Calculate the accuracy of the model, based on the statistic parameter which increases faster during the training.
+   *
+   * @param stats the validation statistics given by the [ValidationHelper]
+   *
+   * @return the accuracy of the [tokenizer]
+   */
+  private fun getAccuracy(stats: ValidationHelper.EvaluationStats): Double {
+
+    return if (this.tokensAccumulatedAccuracy > this.sentencesAccumulatedAccuracy)
+      stats.tokens.f1Score
+    else
+      stats.sentences.f1Score
   }
 
   /**
