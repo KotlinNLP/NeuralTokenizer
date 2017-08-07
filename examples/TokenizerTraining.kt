@@ -8,9 +8,9 @@
 import com.kotlinnlp.neuraltokenizer.*
 import com.kotlinnlp.neuraltokenizer.helpers.TrainingHelper
 import com.kotlinnlp.neuraltokenizer.utils.readDataset
+import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
+import com.kotlinnlp.simplednn.core.layers.LayerType
 import com.kotlinnlp.simplednn.dataset.Shuffler
-import java.io.File
-import java.io.FileOutputStream
 
 /**
  * Execute a training of a [NeuralTokenizer] over the training set read from the file given as second argument and save
@@ -20,18 +20,44 @@ import java.io.FileOutputStream
  */
 fun main(args: Array<String>) {
 
-  val modelFilename = args[0]
-
   val tokenizer = NeuralTokenizer(
-    model = NeuralTokenizerModel(charEmbeddingsSize = 30, hiddenSize = 100),
+    model = NeuralTokenizerModel(
+      charEmbeddingsSize = 30,
+      hiddenSize = 60,
+      hiddenConnectionType = LayerType.Connection.GRU),
     maxSegmentSize = 50)
 
-  TrainingHelper(tokenizer).train(
+  val helper = TrainingHelper(
+    tokenizer = tokenizer,
+    optimizer = NeuralTokenizerOptimizer(
+      tokenizer = tokenizer,
+      charsEncoderUpdateMethod = ADAMMethod(stepSize = 0.001),
+      boundariesClassifierUpdateMethod = ADAMMethod(stepSize = 0.0001),
+      embeddingsUpdateMethod = ADAMMethod(stepSize = 0.001)))
+
+  printModel(tokenizer)
+  println()
+
+  helper.train(
     trainingSet = readDataset(args[1]),
     batchSize = 100,
-    epochs = 15,
+    epochs = 30,
     shuffler = Shuffler(),
-    validationSet = if (args.size > 2) readDataset(args[2]) else null)
+    validationSet = if (args.size > 2) readDataset(args[2]) else null,
+    modelFilename = args[0])
+}
 
-  tokenizer.model.dump(FileOutputStream(File(modelFilename)))
+/**
+ * Print the configuration parameters of the [tokenizer] model.
+ *
+ * @param tokenizer a [NeuralTokenizer]
+ */
+private fun printModel(tokenizer: NeuralTokenizer) {
+
+  println("-- MODEL\n")
+
+  println("BiRNN type: %s".format(tokenizer.model.biRNN.recurrentConnectionType))
+  println("BiRNN output size: %d".format(2 * tokenizer.model.biRNN.hiddenSize))
+  println("Embeddings size: %d".format(tokenizer.model.embeddings.size))
+  println("Max segment size: %d".format(tokenizer.maxSegmentSize))
 }
