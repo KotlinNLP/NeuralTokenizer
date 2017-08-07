@@ -334,8 +334,10 @@ class TrainingHelper(
    */
   private fun registerValidationStats(stats: ValidationHelper.EvaluationStats) {
 
-    this.tokensAccuracyVariation += stats.tokens.f1Score - this.tokensLastAccuracy
-    this.sentencesAccuracyVariation += stats.sentences.f1Score - this.sentencesLastAccuracy
+    if (this.tokensLastAccuracy > 0.0 || this.sentencesLastAccuracy > 0.0) { // skip first variation
+      this.tokensAccuracyVariation += stats.tokens.f1Score - this.tokensLastAccuracy
+      this.sentencesAccuracyVariation += stats.sentences.f1Score - this.sentencesLastAccuracy
+    }
 
     this.tokensLastAccuracy = stats.tokens.f1Score
     this.sentencesLastAccuracy = stats.sentences.f1Score
