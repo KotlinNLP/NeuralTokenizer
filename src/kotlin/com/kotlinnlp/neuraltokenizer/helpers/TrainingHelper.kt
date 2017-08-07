@@ -43,14 +43,24 @@ class TrainingHelper(
   private var bestAccuracy: Double = 0.0
 
   /**
-   * The accuracy in terms of the tokens, accumulated during the training epochs.
+   * The variation of the accuracy in terms of the tokens, accumulated during the training epochs.
    */
-  private var tokensAccumulatedAccuracy: Double = 0.0
+  private var tokensAccuracyVariation: Double = 0.0
 
   /**
-   * The accuracy in terms of the sentences, accumulated during the training epochs.
+   * The variation of the accuracy in terms of the sentences, accumulated during the training epochs.
    */
-  private var sentencesAccumulatedAccuracy: Double = 0.0
+  private var sentencesAccuracyVariation: Double = 0.0
+
+  /**
+   * The last accuracy in terms of the tokens.
+   */
+  private var tokensLastAccuracy: Double = 0.0
+
+  /**
+   * The last accuracy in terms of the sentences.
+   */
+  private var sentencesLastAccuracy: Double = 0.0
 
   /**
    * The gold classification of the current segment.
@@ -318,24 +328,31 @@ class TrainingHelper(
   }
 
   /**
-   * Register the given [stats] to trace the change of speed of each parameter (tokens and sentences).
+   * Register the given [stats] increment to trace the change of speed of each parameter (tokens and sentences).
    *
    * @param stats the validation statistics given by the [ValidationHelper]
    */
   private fun registerValidationStats(stats: ValidationHelper.EvaluationStats) {
 
-    this.tokensAccumulatedAccuracy += stats.tokens.f1Score
-    this.sentencesAccumulatedAccuracy += stats.sentences.f1Score
+    this.tokensAccuracyVariation += stats.tokens.f1Score - this.tokensLastAccuracy
+    this.sentencesAccuracyVariation += stats.sentences.f1Score - this.sentencesLastAccuracy
+
+    this.tokensLastAccuracy = stats.tokens.f1Score
+    this.sentencesLastAccuracy = stats.sentences.f1Score
   }
 
   /**
-   * Reset the accumulated stats obtained with the previous validations.
+   * Reset the stats saved during the previous validations.
    */
   private fun resetValidationStats() {
 
     this.bestAccuracy = 0.0
-    this.tokensAccumulatedAccuracy = 0.0
-    this.tokensAccumulatedAccuracy = 0.0
+
+    this.tokensAccuracyVariation = 0.0
+    this.sentencesAccuracyVariation = 0.0
+
+    this.tokensLastAccuracy = 0.0
+    this.sentencesLastAccuracy = 0.0
   }
 
   /**
@@ -347,7 +364,7 @@ class TrainingHelper(
    */
   private fun getAccuracy(stats: ValidationHelper.EvaluationStats): Double {
 
-    return if (this.tokensAccumulatedAccuracy > this.sentencesAccumulatedAccuracy)
+    return if (this.tokensAccuracyVariation > this.sentencesAccuracyVariation)
       stats.tokens.f1Score
     else
       stats.sentences.f1Score
