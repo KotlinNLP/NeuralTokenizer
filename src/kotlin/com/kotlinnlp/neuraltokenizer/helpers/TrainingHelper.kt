@@ -43,26 +43,6 @@ class TrainingHelper(
   private var bestAccuracy: Double = 0.0
 
   /**
-   * The variation of the accuracy in terms of the tokens, accumulated during the training epochs.
-   */
-  private var tokensAccuracyVariation: Double = 0.0
-
-  /**
-   * The variation of the accuracy in terms of the sentences, accumulated during the training epochs.
-   */
-  private var sentencesAccuracyVariation: Double = 0.0
-
-  /**
-   * The last accuracy in terms of the tokens.
-   */
-  private var tokensLastAccuracy: Double = 0.0
-
-  /**
-   * The last accuracy in terms of the sentences.
-   */
-  private var sentencesLastAccuracy: Double = 0.0
-
-  /**
    * The gold classification of the current segment.
    */
   lateinit private var segmentGoldClassification: ArrayList<Int>
@@ -322,25 +302,7 @@ class TrainingHelper(
     println("Sentences accuracy  ->   Precision: %.2f%%  |  Recall: %.2f%%  |  F1 Score: %.2f%%"
       .format(100.0 * stats.sentences.precision, 100.0 * stats.sentences.recall, 100.0 * stats.sentences.f1Score))
 
-    this.registerValidationStats(stats)
-
     return this.getAccuracy(stats)
-  }
-
-  /**
-   * Register the given [stats] increment to trace the change of speed of each parameter (tokens and sentences).
-   *
-   * @param stats the validation statistics given by the [ValidationHelper]
-   */
-  private fun registerValidationStats(stats: ValidationHelper.EvaluationStats) {
-
-    if (this.tokensLastAccuracy > 0.0 || this.sentencesLastAccuracy > 0.0) { // skip first variation
-      this.tokensAccuracyVariation += stats.tokens.f1Score - this.tokensLastAccuracy
-      this.sentencesAccuracyVariation += stats.sentences.f1Score - this.sentencesLastAccuracy
-    }
-
-    this.tokensLastAccuracy = stats.tokens.f1Score
-    this.sentencesLastAccuracy = stats.sentences.f1Score
   }
 
   /**
@@ -349,16 +311,10 @@ class TrainingHelper(
   private fun resetValidationStats() {
 
     this.bestAccuracy = 0.0
-
-    this.tokensAccuracyVariation = 0.0
-    this.sentencesAccuracyVariation = 0.0
-
-    this.tokensLastAccuracy = 0.0
-    this.sentencesLastAccuracy = 0.0
   }
 
   /**
-   * Calculate the accuracy of the model, based on the statistic parameter which increases faster during the training.
+   * Calculate the accuracy of the model, giving an higher weight to the sentences metric.
    *
    * @param stats the validation statistics given by the [ValidationHelper]
    *
@@ -366,10 +322,7 @@ class TrainingHelper(
    */
   private fun getAccuracy(stats: ValidationHelper.EvaluationStats): Double {
 
-    return if (this.tokensAccuracyVariation > this.sentencesAccuracyVariation)
-      stats.tokens.f1Score
-    else
-      stats.sentences.f1Score
+    return stats.tokens.f1Score * Math.pow(stats.sentences.f1Score, 0.5)
   }
 
   /**
