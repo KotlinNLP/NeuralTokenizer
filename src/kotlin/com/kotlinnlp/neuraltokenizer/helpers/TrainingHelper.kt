@@ -93,6 +93,7 @@ class TrainingHelper(
         if (modelFilename != null && accuracy > bestAccuracy) {
           bestAccuracy = accuracy
           this.tokenizer.model.dump(FileOutputStream(File(modelFilename)))
+          println("NEW BEST ACCURACY! Model saved to \"$modelFilename\"")
         }
       }
     }
