@@ -38,6 +38,11 @@ class TrainingHelper(
   private val validationHelper = ValidationHelper(this.tokenizer)
 
   /**
+   * The best accuracy reached during the training.
+   */
+  private var bestAccuracy: Double = 0.0
+
+  /**
    * The accuracy in terms of the tokens, accumulated during the training epochs.
    */
   private var tokensAccumulatedAccuracy: Double = 0.0
@@ -71,7 +76,6 @@ class TrainingHelper(
 
     println("-- START TRAINING OVER %d SENTENCES".format(trainingSet.size))
 
-    var bestAccuracy: Double = 0.0
     this.resetValidationStats()
 
     (0 until epochs).forEach { i ->
@@ -88,13 +92,7 @@ class TrainingHelper(
       println("Elapsed time: %s".format(this.formatElapsedTime()))
 
       if (validationSet != null) {
-        val accuracy = this.validateEpoch(validationSet)
-
-        if (modelFilename != null && accuracy > bestAccuracy) {
-          bestAccuracy = accuracy
-          this.tokenizer.model.dump(FileOutputStream(File(modelFilename)))
-          println("NEW BEST ACCURACY! Model saved to \"$modelFilename\"")
-        }
+        this.validateAndSaveModel(validationSet = validationSet, modelFilename = modelFilename)
       }
     }
   }
@@ -276,9 +274,29 @@ class TrainingHelper(
   }
 
   /**
+   * Validate the [tokenizer] on the [validationSet] and save its model to [modelFilename].
+   *
+   * @param validationSet the validation dataset to validate the [tokenizer]
+   * @param modelFilename the name of the file in which to save the best model of the [tokenizer] (default = null)
+   */
+  private fun validateAndSaveModel(validationSet: Dataset, modelFilename: String?) {
+
+    val accuracy = this.validateEpoch(validationSet)
+
+    if (modelFilename != null && accuracy > this.bestAccuracy) {
+
+      this.bestAccuracy = accuracy
+
+      this.tokenizer.model.dump(FileOutputStream(File(modelFilename)))
+
+      println("NEW BEST ACCURACY! Model saved to \"$modelFilename\"")
+    }
+  }
+
+  /**
    * Validate the [tokenizer] after trained it over an epoch.
    *
-   * @param validationSet the validation dataset used to validate the [tokenizer]
+   * @param validationSet the validation dataset to validate the [tokenizer]
    *
    * @return the current accuracy of the [tokenizer]
    */
@@ -315,6 +333,7 @@ class TrainingHelper(
    */
   private fun resetValidationStats() {
 
+    this.bestAccuracy = 0.0
     this.tokensAccumulatedAccuracy = 0.0
     this.tokensAccumulatedAccuracy = 0.0
   }
