@@ -64,7 +64,7 @@ class TrainingHelper(
             shuffler: Shuffler? = null,
             modelFilename: String? = null) {
 
-    println("-- START TRAINING OVER %d SENTENCES".format(trainingSet.size))
+    println("-- START TRAINING ON %d SENTENCES".format(trainingSet.size))
 
     this.resetValidationStats()
 
@@ -88,7 +88,7 @@ class TrainingHelper(
   }
 
   /**
-   * Train the [tokenizer] over an epoch, using the [goldClassifications] as reference of correct predictions.
+   * Train the [tokenizer] on one epoch, using the [goldClassifications] as reference of correct predictions.
    *
    * @param text the text to tokenize
    * @param goldClassifications an array containing the correct classification of each character
@@ -284,7 +284,7 @@ class TrainingHelper(
   }
 
   /**
-   * Validate the [tokenizer] after trained it over an epoch.
+   * Validate the [tokenizer] after trained it on an epoch.
    *
    * @param validationSet the validation dataset to validate the [tokenizer]
    *
@@ -292,7 +292,7 @@ class TrainingHelper(
    */
   private fun validateEpoch(validationSet: Dataset): Double {
 
-    println("Epoch validation over %d sentences".format(validationSet.size))
+    println("Epoch validation on %d sentences".format(validationSet.size))
 
     val stats: ValidationHelper.EvaluationStats = this.validationHelper.validate(validationSet)
 
