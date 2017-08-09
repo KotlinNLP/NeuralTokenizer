@@ -25,7 +25,7 @@ fun main(args: Array<String>) {
     maxSegmentSize = 50,
     model = NeuralTokenizerModel.load(FileInputStream(File(args[0]))))
 
-  println("\n-- START VALIDATION OVER %d TEST SENTENCES".format(testSet.size))
+  println("\n-- START VALIDATION ON %d TEST SENTENCES".format(testSet.size))
 
   val helper = ValidationHelper(tokenizer)
   val stats: ValidationHelper.EvaluationStats = helper.validate(testSet)
