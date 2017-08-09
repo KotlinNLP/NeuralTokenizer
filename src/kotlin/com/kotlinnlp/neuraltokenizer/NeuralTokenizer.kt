@@ -146,14 +146,16 @@ class NeuralTokenizer(val model: NeuralTokenizerModel, val maxSegmentSize: Int =
   private fun shiftBuffer(prevSentencesCount: Int, sentencePrevTokensCount: Int) {
 
     if (this.sentences.size > prevSentencesCount) {
-      // New sentences are been added
+      // New sentences added
       this.shiftBufferBySentences()
 
     } else {
-      if (this.curSentenceTokens.isEmpty()) {
+      if (this.curSentenceTokens.isEmpty() || this.curSentenceTokens.size == sentencePrevTokensCount) {
+        // No boundaries found
         this.shiftHalfBuffer()
 
       } else {
+        // New tokens added
         this.shiftBufferByTokens(sentencePrevTokensCount = sentencePrevTokensCount)
       }
     }
@@ -189,7 +191,8 @@ class NeuralTokenizer(val model: NeuralTokenizerModel, val maxSegmentSize: Int =
       curSegmentTokensToKeep++
     }
 
-    val deleteFrom: Int = this.curSentenceBuffer.length - maxSegmentSize + tokensCharsCount
+    val sentencePrevLength: Int = (0 until sentencePrevTokensCount).sumBy { i -> this.curSentenceTokens[i].form.length }
+    val deleteFrom: Int = sentencePrevLength + tokensCharsCount
     this.curSentenceBuffer.delete(deleteFrom, this.curSentenceBuffer.length)
 
     val tokensToKeep: Int = sentencePrevTokensCount + curSegmentTokensToKeep
