@@ -264,7 +264,7 @@ class TrainingHelper(
   }
 
   /**
-   * Validate the [tokenizer] on the [validationSet] and save its model to [modelFilename].
+   * Validate the [tokenizer] on the [validationSet] and save its best model to [modelFilename].
    *
    * @param validationSet the validation dataset to validate the [tokenizer]
    * @param modelFilename the name of the file in which to save the best model of the [tokenizer] (default = null)
