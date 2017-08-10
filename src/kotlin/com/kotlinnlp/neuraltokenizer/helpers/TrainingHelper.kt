@@ -106,7 +106,7 @@ class TrainingHelper(
 
       examplesCount++
 
-      this.learnFromExample(segment = text.subSequence(startIndex, endIndex + 1))
+      this.learnFromExample(text = text, start = startIndex, length = endIndex - startIndex + 1)
 
       if (examplesCount % batchSize == 0) {
         this.endOfBatch()
@@ -199,18 +199,20 @@ class TrainingHelper(
   }
 
   /**
-   * Learn from the given [segment], comparing its gold classification with the one of the [tokenizer] and accumulate
+   * Learn from the given segment, comparing its gold classification with the one of the [tokenizer] and accumulate
    * the propagated errors.
    *
-   * @param segment the segment of text from which to learn
+   * @param text the whole text to tokenize
+   * @param start the start index of the segment
+   * @param length the length of the segment
    */
-  private fun learnFromExample(segment: CharSequence) {
+  private fun learnFromExample(text: String, start: Int, length: Int) {
 
     this.optimizer.newExample()
 
-    this.backward(segmentClassification = this.tokenizer.classifyChars(segment))
+    this.backward(segmentClassification = this.tokenizer.classifyChars(text = text, start = start, length = length))
 
-    this.optimizer.accumulateErrors(segment)
+    this.optimizer.accumulateErrors(segment = text.subSequence(start, start + length))
   }
 
   /**
