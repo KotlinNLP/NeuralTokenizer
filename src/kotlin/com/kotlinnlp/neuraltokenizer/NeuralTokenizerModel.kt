@@ -59,7 +59,7 @@ class NeuralTokenizerModel(
    */
   val biRNN: BiRNN = BiRNN(
     inputType = LayerType.Input.Dense,
-    inputSize = charEmbeddingsSize,
+    inputSize = charEmbeddingsSize + 1,
     hiddenSize = hiddenSize,
     hiddenActivation = Tanh(),
     recurrentConnectionType = hiddenConnectionType
