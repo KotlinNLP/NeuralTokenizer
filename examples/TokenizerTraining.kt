@@ -13,14 +13,15 @@ import com.kotlinnlp.simplednn.core.layers.LayerType
 import com.kotlinnlp.simplednn.dataset.Shuffler
 
 /**
- * Execute a training of a [NeuralTokenizer] over the training set read from the file given as second argument and save
- * its model into the file given as first argument.
- * If a third filename argument is given, the tokenizer is validated after each epoch over the dataset read from the
- * given file.
+ * Execute a training of a [NeuralTokenizer] for the language with the iso-code given as first argument.
+ * The model is saved into the file given as second argument.
+ * The file given as third argument is used as training set.
+ * If a fourth filename argument is given, the tokenizer is validated after each epoch on the dataset read from it.
  */
 fun main(args: Array<String>) {
 
   val tokenizer = NeuralTokenizer(
+    language = args[0],
     model = NeuralTokenizerModel(
       charEmbeddingsSize = 30,
       hiddenSize = 60,
@@ -39,12 +40,12 @@ fun main(args: Array<String>) {
   println()
 
   helper.train(
-    trainingSet = readDataset(args[1]),
+    trainingSet = readDataset(args[2]),
     batchSize = 100,
     epochs = 30,
     shuffler = Shuffler(),
-    validationSet = if (args.size > 2) readDataset(args[2]) else null,
-    modelFilename = args[0])
+    validationSet = if (args.size > 2) readDataset(args[3]) else null,
+    modelFilename = args[1])
 }
 
 /**
