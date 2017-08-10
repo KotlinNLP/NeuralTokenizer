@@ -7,19 +7,28 @@
 
 package com.kotlinnlp.neuraltokenizer
 
+import com.kotlinnlp.neuraltokenizer.utils.AbbreviationsContainer
 import com.kotlinnlp.neuraltokenizer.utils.isSpace
+import com.kotlinnlp.neuraltokenizer.utils.abbreviations
 import com.kotlinnlp.simplednn.deeplearning.birnn.BiRNNEncoder
 import com.kotlinnlp.simplednn.deeplearning.sequenceencoder.SequenceFeedforwardEncoder
+import com.kotlinnlp.simplednn.simplemath.ndarray.Shape
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
+import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArrayFactory
 import kotlin.coroutines.experimental.buildSequence
 
 /**
  * Neural Tokenizer.
  *
  * @property model the model for the sub-networks of this [NeuralTokenizer]
+ * @property language the language within this [NeuralTokenizer] works. If it matches a managed iso-code, special
+ *                    resources will be used for the given language. (Default = unknown)
  * @property maxSegmentSize the max size of the segment of text used as buffer
  */
-class NeuralTokenizer(val model: NeuralTokenizerModel, val maxSegmentSize: Int = 100) {
+class NeuralTokenizer(
+  val model: NeuralTokenizerModel,
+  val language: String = "--",
+  val maxSegmentSize: Int = 100) {
 
   /**
    * The [BiRNNEncoder] used to encode the characters of a segment.
@@ -63,20 +72,27 @@ class NeuralTokenizer(val model: NeuralTokenizerModel, val maxSegmentSize: Int =
     this.sentences = ArrayList<Sentence>()
 
     this.loopSegments(text).forEach { (startIndex, endIndex) ->
-      this.processSegment(text = text, startIndex = startIndex, endIndex = endIndex)
+      this.processSegment(text = text, start = startIndex, end = endIndex)
     }
 
     return this.sentences
   }
 
   /**
-   * @param charSequence a sequence of characters
+   * @param text the whole text to tokenize
+   * @param start the start index of the focus segment
+   * @param length the length of the focus segment
    *
    * @return a list with the classification array of each character
    *         (0 = token boundary follows, 1 = sequence boundary follows, 2 = no boundary follows)
    */
-  fun classifyChars(charSequence: CharSequence): Array<DenseNDArray> {
-    return this.boundariesClassifier.encode(sequence = this.charsEncoder.encode(this.charsToEmbeddings(charSequence)))
+  fun classifyChars(text: String, start: Int, length: Int): Array<DenseNDArray> {
+    return this.boundariesClassifier.encode(
+      sequence = this.charsEncoder.encode(
+        sequence = this.charsToEmbeddings(
+          text = text,
+          start = start,
+          length = length)))
   }
 
   /**
@@ -106,20 +122,20 @@ class NeuralTokenizer(val model: NeuralTokenizerModel, val maxSegmentSize: Int =
   }
 
   /**
-   * Process the segment of [text] between the indices [startIndex] and [endIndex].
+   * Process the segment of [text] between the indices [start] and [end].
    *
    * @param text the text to tokenize
-   * @param startIndex the start index of the segment
-   * @param endIndex the end index of the segment
+   * @param start the start index of the segment
+   * @param end the end index of the segment
    */
-  private fun processSegment(text: String, startIndex: Int, endIndex: Int) {
+  private fun processSegment(text: String, start: Int, end: Int) {
 
-    val charsClassification = this.classifyChars(charSequence = text.subSequence(startIndex, endIndex + 1))
+    val charsClassification = this.classifyChars(text = text, start = start, length = end - start + 1)
     val prevSentencesCount: Int = this.sentences.size
     val sentencePrevTokensCount: Int = this.curSentenceTokens.size
 
     charsClassification.forEachIndexed { i, charClass ->
-      val textIndex: Int = startIndex + i
+      val textIndex: Int = start + i
 
       this.processChar(
         char = text[textIndex],
@@ -213,14 +229,53 @@ class NeuralTokenizer(val model: NeuralTokenizerModel, val maxSegmentSize: Int =
   /**
    * Associate to each character of the sequence an embeddings vector.
    *
-   * @param charSequence a sequence of characters
+   * @param text the whole text to tokenize
+   * @param start the start index of the focus segment
+   * @param length the length of the focus segment
    *
-   * @return the list of embeddings associated to the given [charSequence]
+   * @return the list of embeddings associated to the given segment (one per char)
    */
-  private fun charsToEmbeddings(charSequence: CharSequence): Array<DenseNDArray> = Array(
-    size = charSequence.length,
-    init = { i -> charSequence[i].toEmbedding() }
+  private fun charsToEmbeddings(text: String, start: Int, length: Int): Array<DenseNDArray> = Array(
+    size = length,
+    init = { offset -> text.extractFeatures(start + offset) }
   )
+
+  /**
+   * @param focusIndex the index of the focus char
+   *
+   * @return the [DenseNDArray] of features associated to the char at [focusIndex]
+   */
+  private fun String.extractFeatures(focusIndex: Int): DenseNDArray {
+
+    val char = this[focusIndex]
+    val embedding = char.toEmbedding()
+    val features = DenseNDArrayFactory.emptyArray(Shape(embedding.length + 1))
+
+    (0 until embedding.length).forEach { i -> features[i] = embedding[i] }
+    features[features.length - 1] = if (this.isEndOfAbbreviation(focusIndex)) 1.0 else 0.0 // set abbreviation feature
+
+    return features
+  }
+
+  /**
+   * @param focusIndex the index of the focus char
+   *
+   * @return a Boolean indicating if the char at [focusIndex] is the and of a common abbreviation
+   */
+  private fun String.isEndOfAbbreviation(focusIndex: Int): Boolean {
+
+    if (focusIndex > 0 && this@NeuralTokenizer.language in abbreviations) {
+      val langAbbreviations: AbbreviationsContainer = abbreviations[this@NeuralTokenizer.language]!!
+      val maxNumberOfPrevChars: Int = minOf(focusIndex + 1, langAbbreviations.maxLength)
+
+      (1 until maxNumberOfPrevChars).reversed().forEach { i -> // the last char is always '.'
+        val candidate: String = this.substring(focusIndex - i, focusIndex + 1)
+        if (candidate in langAbbreviations.set) return true
+      }
+    }
+
+    return false
+  }
 
   /**
    * @return the embedding associated to this [Char]
