@@ -33,7 +33,7 @@
 
         <resources>
             <resource>
-                <directory>${project.basedir}/resources</directory>
+                <directory>src/main/resources</directory>
             </resource>
         </resources>
 
