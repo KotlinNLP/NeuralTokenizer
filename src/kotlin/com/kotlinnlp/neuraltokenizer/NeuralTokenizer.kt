@@ -219,13 +219,15 @@ class NeuralTokenizer(val model: NeuralTokenizerModel, val maxSegmentSize: Int =
    */
   private fun charsToEmbeddings(charSequence: CharSequence): Array<DenseNDArray> = Array(
     size = charSequence.length,
-    init = { i ->
-      if (i < this.model.embeddings.count)
-        this.model.embeddings.getEmbedding(charSequence[i].toInt()).array.values
-      else
-        this.model.embeddings.unknownEmbedding.array.values
-    }
+    init = { i -> charSequence[i].toEmbedding() }
   )
+
+  /**
+   * @return the embedding associated to this [Char]
+   */
+  private fun Char.toEmbedding(): DenseNDArray {
+    return this@NeuralTokenizer.model.embeddings.getEmbedding(index = this.toInt()).array.values
+  }
 
   /**
    * Process the [char] understanding if a token or a sentence is just ended at the given [charIndex].
