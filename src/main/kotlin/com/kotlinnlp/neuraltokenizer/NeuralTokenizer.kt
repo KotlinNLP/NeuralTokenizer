@@ -251,24 +251,31 @@ class NeuralTokenizer(
     val embedding = char.toEmbedding()
     val features = DenseNDArrayFactory.emptyArray(Shape(embedding.length + 1))
 
+    // set embedding features
     (0 until embedding.length).forEach { i -> features[i] = embedding[i] }
-    features[features.length - 1] = if (this.isEndOfAbbreviation(focusIndex)) 1.0 else 0.0 // set abbreviation feature
+
+    // set abbreviation feature
+    val nextEndOfAbbreviation: Boolean = focusIndex < this.lastIndex && this.isEndOfAbbreviation(focusIndex + 1)
+    features[features.length - 1] = if (nextEndOfAbbreviation) 1.0 else 0.0
 
     return features
   }
 
   /**
+   * Check if the char at [focusIndex] is the end of an abbreviation, looking for a match for all possible substrings
+   * of this one which end with the focus char.
+   *
    * @param focusIndex the index of the focus char
    *
-   * @return a Boolean indicating if the char at [focusIndex] is the and of a common abbreviation
+   * @return a Boolean indicating if the char at [focusIndex] is the end of a common abbreviation
    */
   private fun String.isEndOfAbbreviation(focusIndex: Int): Boolean {
 
-    if (focusIndex > 0 && this@NeuralTokenizer.language in abbreviations) {
+    if (this@NeuralTokenizer.language in abbreviations && focusIndex > 0 && this[focusIndex] == '.') {
       val langAbbreviations: AbbreviationsContainer = abbreviations[this@NeuralTokenizer.language]!!
       val maxNumberOfPrevChars: Int = minOf(focusIndex + 1, langAbbreviations.maxLength)
 
-      (1 until maxNumberOfPrevChars).reversed().forEach { i -> // the last char is always '.'
+      (1 until maxNumberOfPrevChars).reversed().forEach { i -> // the focus char is always '.'
         val candidate: String = this.substring(focusIndex - i, focusIndex + 1)
         if (candidate in langAbbreviations.set) return true
       }
