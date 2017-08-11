@@ -22,6 +22,8 @@ fun main(args: Array<String>) {
 
   val testSet = readDataset(args[2])
 
+  println("Loading model...")
+
   val tokenizer = NeuralTokenizer(
     language = args[0],
     maxSegmentSize = 50,
