@@ -48,7 +48,7 @@ fun ArrayList<Sentence>.toCoNLLSentences(): ArrayList<CoNLLSentence> {
  *
  * @return an [ArrayList] of [com.kotlinnlp.conllio.Token]s
  */
-fun ArrayList<Token>.toCoNLLTokens(): ArrayList<CoNLLToken> {
+private fun ArrayList<Token>.toCoNLLTokens(): ArrayList<CoNLLToken> {
 
   val conllTokens = ArrayList<CoNLLToken>()
 
@@ -80,3 +80,23 @@ fun ArrayList<Token>.toCoNLLTokens(): ArrayList<CoNLLToken> {
  * @return a Boolean indicating if this Char is a spacing character.
  */
 fun Char.isSpace(): Boolean = spacingRegex.containsMatchIn(this.toString())
+
+/**
+ * Convert an [ArrayList] of [Sentence]s into a [List] of tokens (a [List] of [String]s themselves).
+ *
+ * @return a [List] of [List]s of [String]s
+ */
+fun ArrayList<Sentence>.toNestedStringsList(): List<List<String>> = List(
+  size = this.size,
+  init = { i -> this[i].tokens.toStringsList() }
+)
+
+/**
+ * Convert an [ArrayList] of [Token]s into a [List] of [String]s.
+ *
+ * @return a [List] of [String]s
+ */
+private fun ArrayList<Token>.toStringsList(): List<String> = List(
+  size = this.size,
+  init = { i -> this[i].form }
+)
