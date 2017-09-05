@@ -10,8 +10,8 @@ package com.kotlinnlp.neuraltokenizer
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.UpdateMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGradMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
-import com.kotlinnlp.simplednn.core.optimizer.Optimizer
 import com.kotlinnlp.simplednn.core.optimizer.ParamsOptimizer
+import com.kotlinnlp.simplednn.core.optimizer.ScheduledUpdater
 import com.kotlinnlp.simplednn.deeplearning.birnn.BiRNNOptimizer
 import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsOptimizer
 
@@ -28,7 +28,7 @@ class NeuralTokenizerOptimizer(
   charsEncoderUpdateMethod: UpdateMethod = ADAMMethod(stepSize = 0.001),
   boundariesClassifierUpdateMethod: UpdateMethod = ADAMMethod(stepSize = 0.001),
   embeddingsUpdateMethod: UpdateMethod = AdaGradMethod(learningRate = 0.01)
-) : Optimizer {
+) : ScheduledUpdater {
 
   /**
    * The Optimizer of the charsEncoder of the [tokenizer].
