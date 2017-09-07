@@ -10,9 +10,8 @@ package com.kotlinnlp.neuraltokenizer
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.UpdateMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGradMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
-import com.kotlinnlp.simplednn.core.neuralnetwork.NetworkParamsOptimizer
+import com.kotlinnlp.simplednn.core.optimizer.ParamsOptimizer
 import com.kotlinnlp.simplednn.core.optimizer.ScheduledUpdater
-import com.kotlinnlp.simplednn.deeplearning.birnn.BiRNNOptimizer
 import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsOptimizer
 
 /**
@@ -33,15 +32,15 @@ class NeuralTokenizerOptimizer(
   /**
    * The Optimizer of the charsEncoder of the [tokenizer].
    */
-  private val charsEncoderOptimizer = BiRNNOptimizer(
-    network = this.tokenizer.charsEncoder.network,
+  private val charsEncoderOptimizer = ParamsOptimizer(
+    params = this.tokenizer.charsEncoder.network.model,
     updateMethod = charsEncoderUpdateMethod)
 
   /**
    * The Optimizer of the boundariesClassifier of the [tokenizer].
    */
-  private val boundariesClassifierOptimizer = NetworkParamsOptimizer(
-    neuralNetwork = this.tokenizer.boundariesClassifier.network.network,
+  private val boundariesClassifierOptimizer = ParamsOptimizer(
+    params = this.tokenizer.boundariesClassifier.network.network.model,
     updateMethod = boundariesClassifierUpdateMethod)
 
   /**
