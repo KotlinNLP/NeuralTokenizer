@@ -69,7 +69,7 @@ class NeuralTokenizer(
    */
   fun tokenize(text: String): ArrayList<Sentence> {
 
-    this.sentences = ArrayList<Sentence>()
+    this.sentences = ArrayList()
 
     this.loopSegments(text).forEach { (startIndex, endIndex) ->
       this.processSegment(text = text, start = startIndex, end = endIndex)
@@ -104,7 +104,7 @@ class NeuralTokenizer(
    */
   private fun loopSegments(text: String) = buildSequence {
 
-    var startIndex: Int = 0
+    var startIndex = 0
 
     while (startIndex < text.length) {
 
@@ -198,8 +198,8 @@ class NeuralTokenizer(
 
     val curSegmentTokens = this.curSentenceTokens.subList(sentencePrevTokensCount, this.curSentenceTokens.size)
     val tokensIterator = curSegmentTokens.iterator()
-    var tokensCharsCount: Int = 0
-    var curSegmentTokensToKeep: Int = 0
+    var tokensCharsCount = 0
+    var curSegmentTokensToKeep = 0
 
     while (tokensIterator.hasNext() && tokensCharsCount < this.maxSegmentSize / 2) {
       val token: Token = tokensIterator.next()
@@ -404,6 +404,6 @@ class NeuralTokenizer(
    */
   private fun resetCurSentenceBuffer() {
     this.curSentenceBuffer.setLength(0)
-    this.curSentenceTokens = ArrayList<Token>()
+    this.curSentenceTokens = ArrayList()
   }
 }
