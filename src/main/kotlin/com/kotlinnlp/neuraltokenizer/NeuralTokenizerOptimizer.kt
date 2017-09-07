@@ -24,9 +24,9 @@ import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsOptimizer
  */
 class NeuralTokenizerOptimizer(
   val tokenizer: NeuralTokenizer,
-  charsEncoderUpdateMethod: UpdateMethod = ADAMMethod(stepSize = 0.001),
-  boundariesClassifierUpdateMethod: UpdateMethod = ADAMMethod(stepSize = 0.001),
-  embeddingsUpdateMethod: UpdateMethod = AdaGradMethod(learningRate = 0.01)
+  charsEncoderUpdateMethod: UpdateMethod<*> = ADAMMethod(stepSize = 0.001),
+  boundariesClassifierUpdateMethod: UpdateMethod<*> = ADAMMethod(stepSize = 0.001),
+  embeddingsUpdateMethod: UpdateMethod<*> = AdaGradMethod(learningRate = 0.01)
 ) : ScheduledUpdater {
 
   /**
