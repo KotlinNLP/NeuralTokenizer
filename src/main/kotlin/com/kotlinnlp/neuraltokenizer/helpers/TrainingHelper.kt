@@ -98,7 +98,7 @@ class TrainingHelper(
 
     require(text.length == goldClassifications.size)
 
-    var examplesCount: Int = 0
+    var examplesCount = 0
 
     this.optimizer.newEpoch()
 
@@ -130,7 +130,7 @@ class TrainingHelper(
   private fun loopSegments(text: String, goldClassifications: ArrayList<Int>) = buildSequence {
 
     val progress = ProgressIndicatorBar(total = text.length)
-    var startIndex: Int = 0
+    var startIndex = 0
 
     while (startIndex < text.length) {
 
