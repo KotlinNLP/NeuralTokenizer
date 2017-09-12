@@ -112,13 +112,19 @@ class NeuralTokenizer(
 
       yield(Pair(startIndex, endIndex))
 
-      val lastTokenIndex: Int = if (this@NeuralTokenizer.curSentenceTokens.size > 0)
-        this@NeuralTokenizer.curSentenceTokens.last().endAt
-      else
-        this@NeuralTokenizer.sentences.last().endAt
+      val lastTokenIndex: Int = this@NeuralTokenizer.getLastTokenEndIndex()
 
       startIndex = lastTokenIndex + this@NeuralTokenizer.curTokenBuffer.length + 1
     }
+  }
+
+  /**
+   * @return the end index of the last token added to the current buffer
+   */
+  private fun getLastTokenEndIndex(): Int = when {
+    this.curSentenceTokens.size > 0 -> this.curSentenceTokens.last().endAt // new tokens added
+    this.sentences.size > 0 -> this@NeuralTokenizer.sentences.last().endAt // new sentences added
+    else -> 0 // first token, no new tokens or sentences added (no boundaries found)
   }
 
   /**
