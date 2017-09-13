@@ -62,7 +62,7 @@ private fun ArrayList<Token>.toCoNLLTokens(): ArrayList<CoNLLToken> {
           lemma = "_",
           pos = "_",
           pos2 = "_",
-          feats = mapOf<String, String>(),
+          feats = mapOf(),
           head = if (conllTokens.size == 0) 0 else 1,
           deprel = "_"
         ))
