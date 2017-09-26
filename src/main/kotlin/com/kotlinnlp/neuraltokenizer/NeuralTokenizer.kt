@@ -100,7 +100,7 @@ class NeuralTokenizer(
    *
    * @param text the text to tokenize
    *
-   * @return a Pair containing the start and end indices of the current segment
+   * @return a Pair containing the start (inclusive) and end (exclusive) indices of the current segment
    */
   private fun loopSegments(text: String) = buildSequence {
 
@@ -108,7 +108,7 @@ class NeuralTokenizer(
 
     while (startIndex < text.length) {
 
-      val endIndex: Int = minOf(startIndex + this@NeuralTokenizer.maxSegmentSize - 1, text.lastIndex)
+      val endIndex: Int = minOf(startIndex + this@NeuralTokenizer.maxSegmentSize, text.length)
 
       yield(Pair(startIndex, endIndex))
 
@@ -131,12 +131,12 @@ class NeuralTokenizer(
    * Process the segment of [text] between the indices [start] and [end].
    *
    * @param text the text to tokenize
-   * @param start the start index of the segment
-   * @param end the end index of the segment
+   * @param start the start index of the segment (inclusive)
+   * @param end the end index of the segment (exclusive)
    */
   private fun processSegment(text: String, start: Int, end: Int) {
 
-    val charsClassification = this.classifyChars(text = text, start = start, length = end - start + 1)
+    val charsClassification = this.classifyChars(text = text, start = start, length = end - start)
     val prevSentencesCount: Int = this.sentences.size
     val sentencePrevTokensCount: Int = this.curSentenceTokens.size
 
