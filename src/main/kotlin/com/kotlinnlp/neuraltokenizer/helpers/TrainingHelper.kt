@@ -106,7 +106,7 @@ class TrainingHelper(
 
       examplesCount++
 
-      this.learnFromExample(text = text, start = startIndex, length = endIndex - startIndex + 1)
+      this.learnFromExample(text = text, start = startIndex, length = endIndex - startIndex)
 
       if (examplesCount % batchSize == 0) {
         this.endOfBatch()
@@ -125,7 +125,7 @@ class TrainingHelper(
    * @param text the text to tokenize
    * @param goldClassifications the gold classification of each character of the [text]
    *
-   * @return a Pair containing the start and end indices of the current segment
+   * @return a Pair containing the start (inclusive) and end (exclusive) indices of the current segment
    */
   private fun loopSegments(text: String, goldClassifications: ArrayList<Int>) = buildSequence {
 
@@ -134,9 +134,9 @@ class TrainingHelper(
 
     while (startIndex < text.length) {
 
-      val endIndex: Int = minOf(startIndex + this@TrainingHelper.tokenizer.maxSegmentSize - 1, text.lastIndex)
+      val endIndex: Int = minOf(startIndex + this@TrainingHelper.tokenizer.maxSegmentSize, text.length)
 
-      this@TrainingHelper.segmentGoldClassification = ArrayList(goldClassifications.subList(startIndex, endIndex + 1))
+      this@TrainingHelper.segmentGoldClassification = ArrayList(goldClassifications.subList(startIndex, endIndex))
 
       yield(Pair(startIndex, endIndex))
 
