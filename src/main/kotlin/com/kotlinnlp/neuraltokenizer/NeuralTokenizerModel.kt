@@ -81,7 +81,7 @@ class NeuralTokenizerModel(
   val embeddings = EmbeddingsContainer(
     count = this.EMBEDDINGS_COUNT,
     size = charEmbeddingsSize
-  ).randomize()
+  ).initialize()
 
   /**
    * Serialize this [BiRNN] and write it to an output stream.
