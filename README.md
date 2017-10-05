@@ -30,4 +30,4 @@ This software is released under the terms of the
 ## Contributions
 
 We greatly appreciate any bug reports and contributions, which can be made by filing an issue or making a pull 
-request through the [github page](https://github.com/nlpstep/NeuralTokenizer "NeuralTokenizer on GitHub").
+request through the [github page](https://github.com/KotlinNLP/NeuralTokenizer "NeuralTokenizer on GitHub").
