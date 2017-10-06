@@ -254,13 +254,15 @@ class NeuralTokenizer(
 
     val char = this[focusIndex]
     val embedding = char.toEmbedding()
-    val features = DenseNDArrayFactory.emptyArray(Shape(embedding.length + 1))
+    val features = DenseNDArrayFactory.emptyArray(Shape(embedding.length + 2))
 
-    // set embedding features
+    // Set embedding features
     (0 until embedding.length).forEach { i -> features[i] = embedding[i] }
 
-    // set abbreviation feature
+    // Set "end of abbreviation" features
+    val endOfAbbreviation: Boolean = focusIndex < (this.lastIndex - 1) && this.isEndOfAbbreviation(focusIndex)
     val nextEndOfAbbreviation: Boolean = focusIndex < this.lastIndex && this.isEndOfAbbreviation(focusIndex + 1)
+    features[features.length - 2] = if (endOfAbbreviation) 1.0 else 0.0
     features[features.length - 1] = if (nextEndOfAbbreviation) 1.0 else 0.0
 
     return features
@@ -276,13 +278,19 @@ class NeuralTokenizer(
    */
   private fun String.isEndOfAbbreviation(focusIndex: Int): Boolean {
 
-    if (this@NeuralTokenizer.language in abbreviations && focusIndex > 0 && this[focusIndex] == '.') {
-      val langAbbreviations: AbbreviationsContainer = abbreviations[this@NeuralTokenizer.language]!!
-      val maxNumberOfPrevChars: Int = minOf(focusIndex + 1, langAbbreviations.maxLength)
+    if (this[focusIndex] == '.' && focusIndex > 0 && this@NeuralTokenizer.language in abbreviations) {
 
-      (1 until maxNumberOfPrevChars).reversed().forEach { i -> // the focus char is always '.'
-        val candidate: String = this.substring(focusIndex - i, focusIndex + 1)
-        if (candidate in langAbbreviations.set) return true
+      val langAbbreviations: AbbreviationsContainer = abbreviations[this@NeuralTokenizer.language]!!
+
+      val firstUsefulCharIndex: Int = focusIndex - minOf(focusIndex, langAbbreviations.maxLength - 1)
+      var cadidateStart = focusIndex - 1 // the start index of the candidate abbreviation
+
+      // Back to the first whitespace
+      while (cadidateStart > firstUsefulCharIndex && !this[cadidateStart].isWhitespace()) { cadidateStart-- }
+
+      if (this[cadidateStart].isWhitespace()) { // Consider only substrings delimited by a whitespace
+        val candidate: String = this.substring(cadidateStart + 1..focusIndex).toLowerCase() // trim initial whitespace
+        return candidate in langAbbreviations.set
       }
     }
 
