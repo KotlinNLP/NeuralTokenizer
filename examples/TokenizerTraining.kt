@@ -56,10 +56,7 @@ fun main(args: Array<String>) {
 private fun printModel(tokenizer: NeuralTokenizer) {
 
   println("-- MODEL\n")
-
-  println("Language: %s".format(tokenizer.language))
-  println("BiRNN type: %s".format(tokenizer.model.biRNN.recurrentConnectionType))
-  println("BiRNN output size: %d".format(2 * tokenizer.model.biRNN.hiddenSize))
-  println("Embeddings size: %d".format(tokenizer.model.embeddings.size))
-  println("Max segment size: %d".format(tokenizer.maxSegmentSize))
+  println("- Language: %s".format(tokenizer.language))
+  println("- Max segment size: %d".format(tokenizer.maxSegmentSize))
+  println(tokenizer.model)
 }
