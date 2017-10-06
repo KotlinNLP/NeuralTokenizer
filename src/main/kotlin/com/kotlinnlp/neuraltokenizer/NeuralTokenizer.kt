@@ -139,13 +139,13 @@ class NeuralTokenizer(
     val prevSentencesCount: Int = this.sentences.size
     val sentencePrevTokensCount: Int = this.curSentenceTokens.size
 
-    charsClassification.forEachIndexed { i, charClass ->
+    charsClassification.forEachIndexed { i, charClassification ->
       val textIndex: Int = start + i
 
       this.processChar(
         char = text[textIndex],
         charIndex = textIndex,
-        charClass = charClass.argMaxIndex(),
+        charClass = charClassification.argMaxIndex(),
         isLast = textIndex == text.lastIndex)
     }
 
@@ -312,8 +312,7 @@ class NeuralTokenizer(
       this.addToken(endAt = charIndex - 1, isSpace = false)
     }
 
-    this.curTokenBuffer.append(char)
-    this.curSentenceBuffer.append(char)
+    this.addToBuffers(char)
 
     if (isLast) {
       this.addToken(endAt = charIndex, isSpace = isSpacingChar)
@@ -329,6 +328,16 @@ class NeuralTokenizer(
         2 -> if (isSpacingChar) this.addToken(endAt = charIndex, isSpace = true)
       }
     }
+  }
+
+  /**
+   * Add the given [char] to the token and sentence buffers.
+   *
+   * @param char the char to add
+   */
+  private fun addToBuffers(char: Char) {
+    this.curTokenBuffer.append(char)
+    this.curSentenceBuffer.append(char)
   }
 
   /**
