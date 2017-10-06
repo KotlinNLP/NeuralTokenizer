@@ -40,6 +40,11 @@ class NeuralTokenizer(
   val boundariesClassifier = SequenceFeedforwardEncoder<DenseNDArray>(this.model.sequenceFeedforwardNetwork)
 
   /**
+   * A Boolean indicating if the [language] uses the "scriptio continua" style (writing without spaces).
+   */
+  private val useScriptioContinua: Boolean = this.language in setOf("zh", "ja", "th")
+
+  /**
    * The sentences resulting from the tokenization of a text.
    */
   private var sentences = ArrayList<Sentence>()
@@ -58,6 +63,14 @@ class NeuralTokenizer(
    * The list of completed tokens of the currently buffered sentence.
    */
   private var curSentenceTokens: ArrayList<Token> = arrayListOf()
+
+  /**
+   * Language iso-code check.
+   */
+  init {
+    require(this.language.length == 2) { "The language iso-code must be 2 chars long" }
+    require(this.language == this.language.toLowerCase()) { "The language iso-code must be lower case" }
+  }
 
   /**
    * Tokenize the text splitting it in [Sentence]s and [Token]s.
@@ -144,9 +157,9 @@ class NeuralTokenizer(
 
       this.processChar(
         char = text[textIndex],
+        nextChar = if (textIndex < text.lastIndex) text[textIndex + 1] else null,
         charIndex = textIndex,
-        charClass = charClassification.argMaxIndex(),
-        isLast = textIndex == text.lastIndex)
+        charClass = charClassification.argMaxIndex())
     }
 
     this.shiftBuffer(prevSentencesCount = prevSentencesCount, sentencePrevTokensCount = sentencePrevTokensCount)
@@ -310,9 +323,8 @@ class NeuralTokenizer(
    * @param char the char to process
    * @param charIndex the index of the [char] within the text
    * @param charClass the predicted class of the [char]
-   * @param isLast a Boolean indicating if the [char] is the last of the text
    */
-  private fun processChar(char: Char, charIndex: Int, charClass: Int, isLast: Boolean) {
+  private fun processChar(char: Char, nextChar: Char?, charIndex: Int, charClass: Int) {
 
     val isSpacingChar: Boolean = char.isWhitespace()
 
@@ -322,21 +334,39 @@ class NeuralTokenizer(
 
     this.addToBuffers(char)
 
-    if (isLast) {
+    if (nextChar == null) {
+      // End of text
       this.addToken(endAt = charIndex, isSpace = isSpacingChar)
       this.addSentence(endAt = charIndex)
 
-    } else {
-      when (charClass) {
-        0 -> this.addToken(endAt = charIndex, isSpace = isSpacingChar) // token boundary follows
-        1 -> { // sequence boundary follows
-          this.addToken(endAt = charIndex, isSpace = isSpacingChar)
-          this.addSentence(endAt = charIndex)
-        }
-        2 -> if (isSpacingChar) this.addToken(endAt = charIndex, isSpace = true)
+    } else when (charClass) {
+
+      // token boundary follows
+      0 -> if (!this.isMiddleOfWord(char, nextChar)) {
+        this.addToken(endAt = charIndex, isSpace = isSpacingChar)
+      }
+
+      // sequence boundary follows
+      1 -> if (!this.isMiddleOfWord(char, nextChar)) {
+        this.addToken(endAt = charIndex, isSpace = isSpacingChar)
+        this.addSentence(endAt = charIndex)
+      }
+
+      // no boundary follows
+      2 -> if (isSpacingChar) {
+        this.addToken(endAt = charIndex, isSpace = true)
       }
     }
   }
+
+  /**
+   * @param char a char of the text
+   * @param nextChar the char that follows the given [char]
+   *
+   * @return a Boolean indicating if the given [char] is in the middle of a word
+   */
+  private fun isMiddleOfWord(char: Char, nextChar: Char): Boolean
+    = !this@NeuralTokenizer.useScriptioContinua && char.isLetterOrDigit() && nextChar.isLetterOrDigit()
 
   /**
    * Add the given [char] to the token and sentence buffers.
