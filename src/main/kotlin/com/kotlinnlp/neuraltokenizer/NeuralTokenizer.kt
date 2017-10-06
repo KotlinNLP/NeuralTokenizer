@@ -346,12 +346,12 @@ class NeuralTokenizer(
     } else when (charClass) {
 
       // token boundary follows
-      0 -> if (!this.isMiddleOfWord(char, nextChar)) {
+      0 -> if (isSpacingChar || !this.isMiddleOfWord(char, nextChar)) {
         this.addToken(endAt = charIndex, isSpace = isSpacingChar)
       }
 
       // sequence boundary follows
-      1 -> if (!this.isMiddleOfWord(char, nextChar)) {
+      1 -> if (isSpacingChar || !this.isMiddleOfWord(char, nextChar)) {
         this.addToken(endAt = charIndex, isSpace = isSpacingChar)
         this.addSentence(endAt = charIndex)
       }
@@ -370,7 +370,7 @@ class NeuralTokenizer(
    * @return a Boolean indicating if the given [char] is in the middle of a word
    */
   private fun isMiddleOfWord(char: Char, nextChar: Char): Boolean
-    = !this@NeuralTokenizer.useScriptioContinua && char.isLetterOrDigit() && nextChar.isLetterOrDigit()
+    = !this@NeuralTokenizer.useScriptioContinua && nextChar.isLetterOrDigit() && char.isLetterOrDigit()
 
   /**
    * Add the given [char] to the token and sentence buffers.
