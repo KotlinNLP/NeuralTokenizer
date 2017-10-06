@@ -99,7 +99,7 @@ class NeuralTokenizerOptimizer(
     this.tokenizer.charsEncoder.getInputSequenceErrors(copy = false).forEachIndexed { i, errors ->
       this.embeddingsOptimizer.accumulate(
         embeddingId = segment[i].toInt(),
-        errors = errors.getRange(0, errors.length - 1)
+        errors = errors.getRange(0, errors.length - 2) // 2 adding features (end of abbreviations)
       )
     }
   }
