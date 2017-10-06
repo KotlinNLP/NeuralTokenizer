@@ -42,7 +42,7 @@ fun main(args: Array<String>) {
   helper.train(
     trainingSet = readDataset(args[2]),
     batchSize = 100,
-    epochs = 30,
+    epochs = 20,
     shuffler = Shuffler(),
     validationSet = if (args.size > 2) readDataset(args[3]) else null,
     modelFilename = args[1])
