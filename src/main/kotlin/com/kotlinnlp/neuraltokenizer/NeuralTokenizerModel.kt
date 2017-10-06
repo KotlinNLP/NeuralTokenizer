@@ -99,4 +99,18 @@ class NeuralTokenizerModel(
    * @param outputStream the [OutputStream] in which to write this serialized [BiRNN]
    */
   fun dump(outputStream: OutputStream) = Serializer.serialize(this, outputStream)
+
+  /**
+   * @return the String representation of this model with the values of all main parameters
+   */
+  override fun toString() = """
+    - BiRNN type: %s
+    - BiRNN output size: %d
+    - Embeddings size: %d
+  """
+    .trimIndent()
+    .format(
+      this.biRNN.recurrentConnectionType.name,
+      this.biRNN.outputSize,
+      this.embeddings.size)
 }
