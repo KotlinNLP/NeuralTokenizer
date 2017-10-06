@@ -8,7 +8,6 @@
 package com.kotlinnlp.neuraltokenizer
 
 import com.kotlinnlp.neuraltokenizer.utils.AbbreviationsContainer
-import com.kotlinnlp.neuraltokenizer.utils.isSpace
 import com.kotlinnlp.neuraltokenizer.utils.abbreviations
 import com.kotlinnlp.simplednn.deeplearning.birnn.BiRNNEncoder
 import com.kotlinnlp.simplednn.deeplearning.sequenceencoder.SequenceFeedforwardEncoder
@@ -307,7 +306,7 @@ class NeuralTokenizer(
    */
   private fun processChar(char: Char, charIndex: Int, charClass: Int, isLast: Boolean) {
 
-    val isSpacingChar: Boolean = char.isSpace()
+    val isSpacingChar: Boolean = char.isWhitespace()
 
     if (isSpacingChar && this.curTokenBuffer.isNotEmpty()) { // automatically add the previously buffered token
       this.addToken(endAt = charIndex - 1, isSpace = false)

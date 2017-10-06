@@ -98,7 +98,7 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
   private fun buildDatasetSentences(dataset: Dataset): ArrayList<Sentence> {
 
     val sentences = ArrayList<Sentence>()
-    val textLen: Int = 0
+    val textLen = 0
 
     dataset.forEachIndexed { sentenceId, (sentence, charsClassification) ->
 
@@ -124,7 +124,7 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
   private fun buildDatasetTokens(sentence: String, charsClassification: CharsClassification): ArrayList<Token> {
 
     val tokens = ArrayList<Token>()
-    var startIndex: Int = 0
+    var startIndex = 0
 
     charsClassification.forEachIndexed { i, charClass ->
 
@@ -136,7 +136,7 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
           form = word,
           startAt = startIndex,
           endAt = i,
-          isSpace = word.length == 1 && word.toCharArray()[0].isSpace()))
+          isSpace = word.length == 1 && word.toCharArray()[0].isWhitespace()))
 
         startIndex = i + 1
       }

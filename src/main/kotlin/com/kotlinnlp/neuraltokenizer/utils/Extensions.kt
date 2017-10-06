@@ -15,11 +15,6 @@ typealias CoNLLSentence = com.kotlinnlp.conllio.Sentence
 typealias CoNLLToken = com.kotlinnlp.conllio.Token
 
 /**
- * Regular expression that matches spacing chars.
- */
-private val spacingRegex = Regex("\\s|\\t|\\n|\\r")
-
-/**
  * Convert an [ArrayList] of [Sentence]s into an [ArrayList] of [com.kotlinnlp.conllio.Sentence]s.
  *
  * @return an [ArrayList] of [com.kotlinnlp.conllio.Sentence]s
@@ -75,11 +70,6 @@ private fun ArrayList<Token>.toCoNLLTokens(): ArrayList<CoNLLToken> {
 
   return conllTokens
 }
-
-/**
- * @return a Boolean indicating if this Char is a spacing character.
- */
-fun Char.isSpace(): Boolean = spacingRegex.containsMatchIn(this.toString())
 
 /**
  * Convert an [ArrayList] of [Sentence]s into a [List] of tokens (a [List] of [String]s themselves).
