@@ -13,6 +13,6 @@ import java.nio.file.Paths
  * A set of common abbreviations per language iso-code.
  */
 val abbreviations = mapOf(
-  Pair("it", AbbreviationsContainer(Paths.get("abbreviations", "it.txt").toString())),
-  Pair("en", AbbreviationsContainer(Paths.get("abbreviations", "en.txt").toString()))
+  Pair("it", AbbreviationsContainer(Paths.get("/", "abbreviations", "it.txt").toString())),
+  Pair("en", AbbreviationsContainer(Paths.get("/", "abbreviations", "en.txt").toString()))
 )

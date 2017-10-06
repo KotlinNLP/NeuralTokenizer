@@ -7,8 +7,6 @@
 
 package com.kotlinnlp.neuraltokenizer.utils
 
-import java.io.File
-
 /**
  * A container of common abbreviations read from a given file.
  *
@@ -27,25 +25,18 @@ class AbbreviationsContainer(resPath: String) {
   val maxLength: Int = this.set.getMaxLength()
 
   /**
-   * @param filePath the path of the file which contains one abbreviation per line
+   * @param resPath the path of the file which contains one abbreviation per line, relative to the resources directory
    *
    * @return the list of abbreviations
    */
-  private fun readAbbreviations(filePath: String): Set<String> {
+  private fun readAbbreviations(resPath: String): Set<String> {
 
-    val file = filePath.getResource()
-    val abbreviations = mutableListOf<String>()
+    val lines = this::class.java.getResource(resPath).readText().split("\n")
+    val abbreviations = mutableSetOf<String>()
 
-    file.forEachLine { line -> abbreviations.add(line) }
+    lines.forEach { line -> abbreviations.add(line) }
 
     return abbreviations.toSet()
-  }
-
-  /**
-   * @return the resource file with this [String] as path
-   */
-  private fun String.getResource(): File {
-    return File(Thread.currentThread().contextClassLoader.getResource(this).file)
   }
 
   /**
