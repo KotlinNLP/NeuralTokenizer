@@ -55,11 +55,21 @@ class NeuralTokenizerModel(
   private val EMBEDDINGS_COUNT: Int = 1e05.toInt()
 
   /**
+   * The number of adding features (in addition to the embeddings array).
+   * They are:
+   *  - isLetter
+   *  - isDigit
+   *  - "end of abbreviation"
+   *  - "next end of abbreviation"
+   */
+  val addingFeaturesSize = 4
+
+  /**
    * The [BiRNN] model of the charsEncoder.
    */
   val biRNN: BiRNN = BiRNN(
     inputType = LayerType.Input.Dense,
-    inputSize = charEmbeddingsSize + 2, // 2 adding features (end of abbreviations)
+    inputSize = charEmbeddingsSize + addingFeaturesSize,
     hiddenSize = hiddenSize,
     hiddenActivation = Tanh(),
     recurrentConnectionType = hiddenConnectionType

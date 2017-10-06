@@ -265,17 +265,21 @@ class NeuralTokenizer(
    */
   private fun String.extractFeatures(focusIndex: Int): DenseNDArray {
 
-    val char = this[focusIndex]
-    val embedding = char.toEmbedding()
-    val features = DenseNDArrayFactory.emptyArray(Shape(embedding.length + 2))
+    val char: Char = this[focusIndex]
+    val embedding: DenseNDArray = char.toEmbedding()
+    val features: DenseNDArray = DenseNDArrayFactory.emptyArray(
+      shape = Shape(embedding.length + this@NeuralTokenizer.model.addingFeaturesSize)
+    )
 
     // Set embedding features
     (0 until embedding.length).forEach { i -> features[i] = embedding[i] }
 
-    // Set "end of abbreviation" features
-    val endOfAbbreviation: Boolean = focusIndex < (this.lastIndex - 1) && this.isEndOfAbbreviation(focusIndex)
     val nextEndOfAbbreviation: Boolean = focusIndex < this.lastIndex && this.isEndOfAbbreviation(focusIndex + 1)
-    features[features.length - 2] = if (endOfAbbreviation) 1.0 else 0.0
+
+    // Set adding features (isLetter, isDigit, "end of abbreviation")
+    features[features.length - 4] = if (this[focusIndex].isLetter()) 1.0 else 0.0
+    features[features.length - 3] = if (this[focusIndex].isDigit()) 1.0 else 0.0
+    features[features.length - 2] = if (this.isEndOfAbbreviation(focusIndex)) 1.0 else 0.0
     features[features.length - 1] = if (nextEndOfAbbreviation) 1.0 else 0.0
 
     return features
