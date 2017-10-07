@@ -20,13 +20,10 @@ import kotlin.coroutines.experimental.buildSequence
  * Neural Tokenizer.
  *
  * @property model the model for the sub-networks of this [NeuralTokenizer]
- * @property language the language within this [NeuralTokenizer] works. If it matches a managed iso-code, special
- *                    resources will be used for the given language. (Default = unknown)
  * @property maxSegmentSize the max size of the segment of text used as buffer
  */
 class NeuralTokenizer(
   val model: NeuralTokenizerModel,
-  val language: String = "--",
   val maxSegmentSize: Int = 100) {
 
   /**
@@ -40,9 +37,9 @@ class NeuralTokenizer(
   val boundariesClassifier = SequenceFeedforwardEncoder<DenseNDArray>(this.model.sequenceFeedforwardNetwork)
 
   /**
-   * A Boolean indicating if the [language] uses the "scriptio continua" style (writing without spaces).
+   * A Boolean indicating if the language uses the "scriptio continua" style (writing without spaces).
    */
-  private val useScriptioContinua: Boolean = this.language in setOf("zh", "ja", "th")
+  private val useScriptioContinua: Boolean = this.model.language in setOf("zh", "ja", "th")
 
   /**
    * The sentences resulting from the tokenization of a text.
@@ -63,14 +60,6 @@ class NeuralTokenizer(
    * The list of completed tokens of the currently buffered sentence.
    */
   private var curSentenceTokens: ArrayList<Token> = arrayListOf()
-
-  /**
-   * Language iso-code check.
-   */
-  init {
-    require(this.language.length == 2) { "The language iso-code must be 2 chars long" }
-    require(this.language == this.language.toLowerCase()) { "The language iso-code must be lower case" }
-  }
 
   /**
    * Tokenize the text splitting it in [Sentence]s and [Token]s.
@@ -295,9 +284,9 @@ class NeuralTokenizer(
    */
   private fun String.isEndOfAbbreviation(focusIndex: Int): Boolean {
 
-    if (this[focusIndex] == '.' && focusIndex > 0 && this@NeuralTokenizer.language in abbreviations) {
+    if (this[focusIndex] == '.' && focusIndex > 0 && this@NeuralTokenizer.model.language in abbreviations) {
 
-      val langAbbreviations: AbbreviationsContainer = abbreviations[this@NeuralTokenizer.language]!!
+      val langAbbreviations: AbbreviationsContainer = abbreviations[this@NeuralTokenizer.model.language]!!
 
       val firstUsefulCharIndex: Int = focusIndex - minOf(focusIndex, langAbbreviations.maxLength - 1)
       var cadidateStart = focusIndex - 1 // the start index of the candidate abbreviation

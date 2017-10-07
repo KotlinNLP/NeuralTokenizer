@@ -12,9 +12,9 @@ import java.io.File
 import java.io.FileInputStream
 
 /**
- * Execute an evaluation of a [NeuralTokenizer] for the language with the iso-code given as first argument.
- * The model of the tokenizer is read from the serialized file given as second argument.
- * The file given as third argument is used as test set.
+ * Execute an evaluation of a [NeuralTokenizerModel].
+ * The model is read from the serialized file given as first argument.
+ * The file given as second argument is used as test set.
  */
 fun main(args: Array<String>) {
 
@@ -25,7 +25,6 @@ fun main(args: Array<String>) {
   println("Loading model...")
 
   val tokenizer = NeuralTokenizer(
-    language = args[0],
     maxSegmentSize = 50,
     model = NeuralTokenizerModel.load(FileInputStream(File(args[1]))))
 

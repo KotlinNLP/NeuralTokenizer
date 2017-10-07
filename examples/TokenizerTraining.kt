@@ -21,8 +21,8 @@ import com.kotlinnlp.simplednn.dataset.Shuffler
 fun main(args: Array<String>) {
 
   val tokenizer = NeuralTokenizer(
-    language = args[0],
     model = NeuralTokenizerModel(
+      language = args[0],
       charEmbeddingsSize = 30,
       hiddenSize = 60,
       hiddenConnectionType = LayerType.Connection.GRU),
@@ -56,7 +56,6 @@ fun main(args: Array<String>) {
 private fun printModel(tokenizer: NeuralTokenizer) {
 
   println("-- MODEL\n")
-  println("- Language: %s".format(tokenizer.language))
   println("- Max segment size: %d".format(tokenizer.maxSegmentSize))
   println(tokenizer.model)
 }
