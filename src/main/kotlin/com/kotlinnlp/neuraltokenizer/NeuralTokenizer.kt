@@ -20,11 +20,8 @@ import kotlin.coroutines.experimental.buildSequence
  * Neural Tokenizer.
  *
  * @property model the model for the sub-networks of this [NeuralTokenizer]
- * @property maxSegmentSize the max size of the segment of text used as buffer
  */
-class NeuralTokenizer(
-  val model: NeuralTokenizerModel,
-  val maxSegmentSize: Int = 100) {
+class NeuralTokenizer(val model: NeuralTokenizerModel) {
 
   /**
    * The [BiRNNEncoder] used to encode the characters of a segment.
@@ -109,7 +106,7 @@ class NeuralTokenizer(
 
     while (startIndex < text.length) {
 
-      val endIndex: Int = minOf(startIndex + this@NeuralTokenizer.maxSegmentSize, text.length)
+      val endIndex: Int = minOf(startIndex + this@NeuralTokenizer.model.maxSegmentSize, text.length)
 
       yield(Pair(startIndex, endIndex))
 
@@ -159,8 +156,8 @@ class NeuralTokenizer(
    * If new sentences are added, buffers are shifted removing all the completed sentences.
    * If only tokens are added, buffers are shifted removing the first N tokens until the one that crosses the middle of
    * the segment.
-   * If neither sentences or tokens are added, buffers are shifted of an amount of chars equal to half of
-   * [maxSegmentSize].
+   * If neither sentences or tokens are added, buffers are shifted of an amount of chars equal to half of the max
+   * segment size (defined in the model).
    *
    * @param prevSentencesCount the number of completed sentences before processing the current segment
    * @param sentencePrevTokensCount the number of completed tokens of the current sentence before processing the current
@@ -189,7 +186,7 @@ class NeuralTokenizer(
    */
   private fun shiftHalfBuffer() {
 
-    val halfSegmentSize: Int = this.maxSegmentSize / 2
+    val halfSegmentSize: Int = this.model.maxSegmentSize / 2
 
     this.curSentenceBuffer.delete(this.curSentenceBuffer.length - halfSegmentSize, this.curSentenceBuffer.length)
     this.curTokenBuffer.delete(this.curTokenBuffer.length - halfSegmentSize, this.curTokenBuffer.length)
@@ -208,7 +205,7 @@ class NeuralTokenizer(
     var tokensCharsCount = 0
     var curSegmentTokensToKeep = 0
 
-    while (tokensIterator.hasNext() && tokensCharsCount < this.maxSegmentSize / 2) {
+    while (tokensIterator.hasNext() && tokensCharsCount < this.model.maxSegmentSize / 2) {
       val token: Token = tokensIterator.next()
       tokensCharsCount += token.form.length
       curSegmentTokensToKeep++

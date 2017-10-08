@@ -30,7 +30,7 @@ fun main(args: Array<String>) {
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(testSet.size))
   println("Language: ${args[0]}")
 
-  val helper = ValidationHelper(tokenizer = NeuralTokenizer(maxSegmentSize = 50, model = model))
+  val helper = ValidationHelper(tokenizer = NeuralTokenizer(model))
   val stats: ValidationHelper.EvaluationStats = helper.validate(testSet)
 
   println()

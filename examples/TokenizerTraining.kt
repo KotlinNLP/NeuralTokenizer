@@ -23,10 +23,10 @@ fun main(args: Array<String>) {
   val tokenizer = NeuralTokenizer(
     model = NeuralTokenizerModel(
       language = args[0],
+      maxSegmentSize = 50,
       charEmbeddingsSize = 30,
       hiddenSize = 60,
-      hiddenConnectionType = LayerType.Connection.GRU),
-    maxSegmentSize = 50)
+      hiddenConnectionType = LayerType.Connection.GRU))
 
   val helper = TrainingHelper(
     tokenizer = tokenizer,
@@ -42,7 +42,7 @@ fun main(args: Array<String>) {
   helper.train(
     trainingSet = readDataset(args[2]),
     batchSize = 100,
-    epochs = 20,
+    epochs = 30,
     shuffler = Shuffler(),
     validationSet = if (args.size > 2) readDataset(args[3]) else null,
     modelFilename = args[1])
@@ -56,6 +56,5 @@ fun main(args: Array<String>) {
 private fun printModel(tokenizer: NeuralTokenizer) {
 
   println("-- MODEL\n")
-  println("- Max segment size: %d".format(tokenizer.maxSegmentSize))
   println(tokenizer.model)
 }

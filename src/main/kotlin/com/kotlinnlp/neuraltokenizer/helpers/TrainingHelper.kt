@@ -134,7 +134,7 @@ class TrainingHelper(
 
     while (startIndex < text.length) {
 
-      val endIndex: Int = minOf(startIndex + this@TrainingHelper.tokenizer.maxSegmentSize, text.length)
+      val endIndex: Int = minOf(startIndex + this@TrainingHelper.tokenizer.model.maxSegmentSize, text.length)
 
       this@TrainingHelper.segmentGoldClassification = ArrayList(goldClassifications.subList(startIndex, endIndex))
 

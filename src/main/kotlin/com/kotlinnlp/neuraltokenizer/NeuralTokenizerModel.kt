@@ -23,12 +23,14 @@ import java.io.Serializable
  *
  * @property language the language within the [NeuralTokenizer] works. If it matches a managed iso-code, special
  *                    resources will be used for the given language. (Default = unknown)
+ * @property maxSegmentSize the max size of the segment of text used as buffer
  * @param charEmbeddingsSize the size of each embeddings associated to each character (default = 30)
- * @param hiddenSize the size of the hidden arrays (the output of each RNN of the [BiRNN]) (default = 100)
+ * @param hiddenSize the size of the hidden arrays (the output of each RNN of the [BiRNN]) (default = 50)
  * @param hiddenConnectionType the recurrent connection type of the [BiRNN] (default = RAN)
  */
 class NeuralTokenizerModel(
   val language: String = "--",
+  val maxSegmentSize: Int = 50,
   charEmbeddingsSize: Int = 30,
   hiddenSize: Int = 100,
   hiddenConnectionType: LayerType.Connection = LayerType.Connection.RAN
@@ -119,11 +121,13 @@ class NeuralTokenizerModel(
     - BiRNN type: %s
     - BiRNN output size: %d
     - Embeddings size: %d
+    - Max segment size: %d
   """
     .trimIndent()
     .format(
       this.language,
       this.biRNN.recurrentConnectionType.name,
       this.biRNN.outputSize,
-      this.embeddings.size)
+      this.embeddings.size,
+      this.maxSegmentSize)
 }
