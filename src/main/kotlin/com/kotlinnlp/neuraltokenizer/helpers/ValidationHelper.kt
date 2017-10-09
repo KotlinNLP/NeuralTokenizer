@@ -37,12 +37,12 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
   /**
    * The name of the temporary file in which to write the output of the tokenizer in CoNLL format.
    */
-  private val OUTPUT_FILENAME = "/tmp/tokenizer_output_validation_corpus.conll"
+  private val OUTPUT_FILENAME = "/tmp/tokenizer_output_validation_corpus_${System.currentTimeMillis()}.conll"
 
   /**
    * The name of the temporary file in which to write the test dataset in CoNLL format.
    */
-  private val TEST_FILENAME = "/tmp/tokenizer_test_validation_corpus.conll"
+  private val TEST_FILENAME = "/tmp/tokenizer_test_validation_corpus_${System.currentTimeMillis()}.conll"
 
   /**
    * When timing started.
