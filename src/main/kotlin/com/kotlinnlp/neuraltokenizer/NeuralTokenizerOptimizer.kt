@@ -47,7 +47,7 @@ class NeuralTokenizerOptimizer(
    * The Optimizer of the embeddings vectors of the [tokenizer].
    */
   private val embeddingsOptimizer = EmbeddingsOptimizer(
-    embeddingsContainer = this.tokenizer.model.embeddings,
+    embeddingsMap = this.tokenizer.model.embeddings,
     updateMethod = embeddingsUpdateMethod)
 
   /**
@@ -98,7 +98,7 @@ class NeuralTokenizerOptimizer(
 
     this.tokenizer.charsEncoder.getInputSequenceErrors(copy = false).forEachIndexed { i, errors ->
       this.embeddingsOptimizer.accumulate(
-        embeddingId = segment[i].toInt(),
+        embeddingKey = segment[i],
         errors = errors.getRange(0, errors.length - this.tokenizer.model.addingFeaturesSize)
       )
     }

@@ -11,7 +11,7 @@ import com.kotlinnlp.simplednn.core.functionalities.activations.Softmax
 import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh
 import com.kotlinnlp.simplednn.core.layers.LayerType
 import com.kotlinnlp.simplednn.deeplearning.birnn.BiRNN
-import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsContainer
+import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsMap
 import com.kotlinnlp.simplednn.deeplearning.sequenceencoder.SequenceFeedforwardNetwork
 import com.kotlinnlp.simplednn.utils.Serializer
 import java.io.InputStream
@@ -55,11 +55,6 @@ class NeuralTokenizerModel(
   }
 
   /**
-   * The max number of embeddings into the container.
-   */
-  private val EMBEDDINGS_COUNT: Int = 1e05.toInt()
-
-  /**
    * The number of adding features (in addition to the embeddings array).
    * They are:
    *  - isLetter
@@ -91,12 +86,9 @@ class NeuralTokenizerModel(
   ).initialize()
 
   /**
-   * The container of embeddings to associate to each character.
+   * The embeddings mapped to each character.
    */
-  val embeddings = EmbeddingsContainer(
-    count = this.EMBEDDINGS_COUNT,
-    size = charEmbeddingsSize
-  ).initialize()
+  val embeddings = EmbeddingsMap<Char>(size = charEmbeddingsSize)
 
   /**
    * Language iso-code check.

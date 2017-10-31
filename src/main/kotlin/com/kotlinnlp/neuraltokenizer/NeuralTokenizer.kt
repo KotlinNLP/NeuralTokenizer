@@ -304,7 +304,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    * @return the embedding associated to this [Char]
    */
   private fun Char.toEmbedding(): DenseNDArray {
-    return this@NeuralTokenizer.model.embeddings.getEmbedding(id = this.toInt()).array.values
+    return this@NeuralTokenizer.model.embeddings.get(key = this).array.values
   }
 
   /**
