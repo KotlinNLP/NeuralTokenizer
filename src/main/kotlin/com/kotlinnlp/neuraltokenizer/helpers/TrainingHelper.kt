@@ -68,6 +68,8 @@ class TrainingHelper(
 
     this.resetValidationStats()
 
+    this.initEmbeddings(trainingSet)
+
     (0 until epochs).forEach { i ->
 
       println("\nEpoch ${i + 1}")
@@ -83,6 +85,23 @@ class TrainingHelper(
 
       if (validationSet != null) {
         this.validateAndSaveModel(validationSet = validationSet, modelFilename = modelFilename)
+      }
+    }
+  }
+
+  /**
+   * Initialize the Embeddings of the [tokenizer] model, associating them to the chars contained in the given
+   * [trainingSet].
+   *
+   * @param trainingSet the dataset to train the [tokenizer]
+   */
+  private fun initEmbeddings(trainingSet: Dataset) {
+
+    trainingSet.forEach { (sentence, _) ->
+      sentence.forEach { char ->
+        if (char !in this.tokenizer.model.embeddings) {
+          this.tokenizer.model.embeddings.set(key = char)
+        }
       }
     }
   }
