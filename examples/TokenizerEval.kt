@@ -15,7 +15,7 @@ import java.io.FileInputStream
  * Execute an evaluation of a [NeuralTokenizerModel].
  *
  * Command line arguments:
- *   1. The serialized model of the tokenizer.
+ *   1. The filename of the serialized model of the tokenizer.
  *   2. The filename of the test dataset.
  */
 fun main(args: Array<String>) {
