@@ -13,10 +13,13 @@ import com.kotlinnlp.simplednn.core.layers.LayerType
 import com.kotlinnlp.simplednn.dataset.Shuffler
 
 /**
- * Execute a training of a [NeuralTokenizer] for the language with the iso-code given as first argument.
- * The model is saved into the file given as second argument.
- * The file given as third argument is used as training set.
- * If a fourth filename argument is given, the tokenizer is validated after each epoch on the dataset read from it.
+ * Execute the training of a [NeuralTokenizer].
+ *
+ * Command line arguments:
+ *   1. The language iso-code ("--" for no language).
+ *   2. The name of the file in which to save the model.
+ *   3. The filename of the training dataset.
+ *   4. The filename of the validation set (optional -> if present, the tokenizer is validated on it after each epoch).
  */
 fun main(args: Array<String>) {
 
