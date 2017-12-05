@@ -72,8 +72,7 @@ class NeuralTokenizerModel(
     inputSize = charEmbeddingsSize + addingFeaturesSize,
     hiddenSize = hiddenSize,
     hiddenActivation = Tanh(),
-    recurrentConnectionType = hiddenConnectionType
-  ).initialize()
+    recurrentConnectionType = hiddenConnectionType)
 
   /**
    * The [SequenceFeedforwardNetwork] model of the boundariesEncoder.
@@ -82,8 +81,7 @@ class NeuralTokenizerModel(
     inputType = LayerType.Input.Dense,
     inputSize = 2 * hiddenSize,
     outputSize = 3,
-    outputActivation = Softmax()
-  ).initialize()
+    outputActivation = Softmax())
 
   /**
    * The embeddings mapped to each character.
