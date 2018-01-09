@@ -1,4 +1,4 @@
-# NeuralTokenizer
+# NeuralTokenizer [![GitHub version](https://badge.fury.io/gh/KotlinNLP%2Fneuraltokenizer.svg)](https://badge.fury.io/gh/KotlinNLP%2Fneuraltokenizer) [![Build Status](https://travis-ci.org/KotlinNLP/NeuralTokenizer.svg?branch=master)](https://travis-ci.org/KotlinNLP/NeuralTokenizer)
 
 NeuralTokenizer is a very simple to use text tokenizer which uses neural networks from the [SimpleDNN](https://github.com/nlpstep/simplednn "SimpleDNN") library.
 
