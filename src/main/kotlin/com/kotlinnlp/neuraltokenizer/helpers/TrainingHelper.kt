@@ -45,7 +45,7 @@ class TrainingHelper(
   /**
    * The gold classification of the current segment.
    */
-  lateinit private var segmentGoldClassification: ArrayList<Int>
+  private lateinit var segmentGoldClassification: ArrayList<Int>
 
   /**
    * Train the [tokenizer] using the chars classifications of the [trainingSet] as reference of correct predictions.
@@ -248,14 +248,14 @@ class TrainingHelper(
    *
    * @param segmentClassification the classification of the current segment
    */
-  private fun backward(segmentClassification: Array<DenseNDArray>) {
+  private fun backward(segmentClassification: List<DenseNDArray>) {
 
     this.backwardBoundariesClassifier(
       segmentClassification = segmentClassification,
       goldSegmentClassification = this.segmentGoldClassification)
 
     this.tokenizer.charsEncoder.backward(
-      outputErrorsSequence = this.tokenizer.boundariesClassifier.getInputSequenceErrors(copy = false),
+      outputErrorsSequence = this.tokenizer.boundariesClassifier.getInputErrors(copy = false),
       propagateToInput = true)
   }
 
@@ -265,11 +265,11 @@ class TrainingHelper(
    *
    * @param segmentClassification the classification of the current segment
    */
-  private fun backwardBoundariesClassifier(segmentClassification: Array<DenseNDArray>,
-                                           goldSegmentClassification: ArrayList<Int>) {
+  private fun backwardBoundariesClassifier(segmentClassification: List<DenseNDArray>,
+                                           goldSegmentClassification: List<Int>) {
 
     this.tokenizer.boundariesClassifier.backward(
-      outputErrorsSequence = Array(
+      List(
         size = goldSegmentClassification.size,
         init = { i ->
           val charClassification: DenseNDArray = segmentClassification[i]

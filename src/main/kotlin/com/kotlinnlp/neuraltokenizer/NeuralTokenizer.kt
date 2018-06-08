@@ -9,8 +9,8 @@ package com.kotlinnlp.neuraltokenizer
 
 import com.kotlinnlp.neuraltokenizer.utils.AbbreviationsContainer
 import com.kotlinnlp.neuraltokenizer.utils.abbreviations
+import com.kotlinnlp.simplednn.core.neuralprocessor.batchfeedforward.BatchFeedforwardProcessor
 import com.kotlinnlp.simplednn.deeplearning.birnn.BiRNNEncoder
-import com.kotlinnlp.simplednn.deeplearning.sequenceencoder.SequenceFeedforwardEncoder
 import com.kotlinnlp.simplednn.simplemath.ndarray.Shape
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArrayFactory
@@ -29,9 +29,9 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
   val charsEncoder = BiRNNEncoder<DenseNDArray>(this.model.biRNN)
 
   /**
-   * The [SequenceFeedforwardEncoder] used as classifier for the output arrays of the [charsEncoder].
+   * The processor of the boundariesNetworkModel.
    */
-  val boundariesClassifier = SequenceFeedforwardEncoder<DenseNDArray>(this.model.sequenceFeedforwardNetwork)
+  val boundariesClassifier = BatchFeedforwardProcessor<DenseNDArray>(this.model.boundariesNetworkModel)
 
   /**
    * A Boolean indicating if the language uses the "scriptio continua" style (writing without spaces).
@@ -84,14 +84,13 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    * @return a list with the classification array of each character
    *         (0 = token boundary follows, 1 = sequence boundary follows, 2 = no boundary follows)
    */
-  fun classifyChars(text: String, start: Int, length: Int): Array<DenseNDArray> {
-    return this.boundariesClassifier.encode(
-      sequence = this.charsEncoder.encode(
+  fun classifyChars(text: String, start: Int, length: Int): List<DenseNDArray> =
+    this.boundariesClassifier.forward(
+      this.charsEncoder.encode(
         sequence = this.charsToEmbeddings(
           text = text,
           start = start,
           length = length)))
-  }
 
   /**
    * Loop over the segments of text.
@@ -239,7 +238,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    *
    * @return the list of embeddings associated to the given segment (one per char)
    */
-  private fun charsToEmbeddings(text: String, start: Int, length: Int): Array<DenseNDArray> = Array(
+  private fun charsToEmbeddings(text: String, start: Int, length: Int) = List(
     size = length,
     init = { offset -> text.extractFeatures(start + offset) }
   )

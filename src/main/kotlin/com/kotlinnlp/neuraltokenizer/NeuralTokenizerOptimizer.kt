@@ -7,12 +7,12 @@
 
 package com.kotlinnlp.neuraltokenizer
 
+import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsOptimizer
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.UpdateMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGradMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
 import com.kotlinnlp.simplednn.core.optimizer.ParamsOptimizer
 import com.kotlinnlp.simplednn.core.optimizer.ScheduledUpdater
-import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsOptimizer
 
 /**
  * The Optimizer of the sub-networks of the [NeuralTokenizer].
@@ -40,7 +40,7 @@ class NeuralTokenizerOptimizer(
    * The Optimizer of the boundariesClassifier of the [tokenizer].
    */
   private val boundariesClassifierOptimizer = ParamsOptimizer(
-    params = this.tokenizer.boundariesClassifier.network.network.model,
+    params = this.tokenizer.boundariesClassifier.neuralNetwork.model,
     updateMethod = boundariesClassifierUpdateMethod)
 
   /**

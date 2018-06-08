@@ -7,13 +7,14 @@
 
 package com.kotlinnlp.neuraltokenizer
 
+import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMap
 import com.kotlinnlp.simplednn.core.functionalities.activations.Softmax
 import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh
+import com.kotlinnlp.simplednn.core.layers.LayerInterface
 import com.kotlinnlp.simplednn.core.layers.LayerType
+import com.kotlinnlp.simplednn.core.neuralnetwork.NeuralNetwork
 import com.kotlinnlp.simplednn.deeplearning.birnn.BiRNN
-import com.kotlinnlp.simplednn.deeplearning.embeddings.EmbeddingsMap
-import com.kotlinnlp.simplednn.deeplearning.sequenceencoder.SequenceFeedforwardNetwork
-import com.kotlinnlp.simplednn.utils.Serializer
+import com.kotlinnlp.utils.Serializer
 import java.io.InputStream
 import java.io.OutputStream
 import java.io.Serializable
@@ -75,13 +76,17 @@ class NeuralTokenizerModel(
     recurrentConnectionType = hiddenConnectionType)
 
   /**
-   * The [SequenceFeedforwardNetwork] model of the boundariesEncoder.
+   * The model of the boundariesEncoder.
    */
-  val sequenceFeedforwardNetwork = SequenceFeedforwardNetwork(
-    inputType = LayerType.Input.Dense,
-    inputSize = 2 * hiddenSize,
-    outputSize = 3,
-    outputActivation = Softmax())
+  val boundariesNetworkModel = NeuralNetwork(
+    LayerInterface(
+      type = LayerType.Input.Dense,
+      size = 2 * hiddenSize),
+    LayerInterface(
+      size = 3,
+      activationFunction = Softmax()
+    )
+  )
 
   /**
    * The embeddings mapped to each character.
