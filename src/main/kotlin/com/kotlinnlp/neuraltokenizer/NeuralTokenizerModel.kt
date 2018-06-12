@@ -84,8 +84,8 @@ class NeuralTokenizerModel(
       size = 2 * hiddenSize),
     LayerInterface(
       size = 3,
-      activationFunction = Softmax()
-    )
+      activationFunction = Softmax(),
+      connectionType = LayerType.Connection.Feedforward)
   )
 
   /**
