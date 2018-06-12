@@ -7,15 +7,14 @@
 
 package com.kotlinnlp.neuraltokenizer.utils
 
-import com.jsoniter.JsonIterator
+import com.beust.klaxon.JsonArray
+import com.beust.klaxon.Parser
 import com.kotlinnlp.simplednn.dataset.Shuffler
 import com.kotlinnlp.simplednn.helpers.training.utils.ExamplesIndices
-import java.io.BufferedInputStream
-import java.io.FileInputStream
 
-typealias CharsClassification = ArrayList<Int>
+typealias CharsClassification = List<Int>
 typealias AnnotatedSentence = Pair<String, CharsClassification>
-typealias Dataset = ArrayList<AnnotatedSentence>
+typealias Dataset = List<AnnotatedSentence>
 
 /**
  * InvalidDataset Exception.
@@ -42,23 +41,16 @@ class InvalidDataset(message: String) : RuntimeException(message)
  */
 fun readDataset(filename: String): Dataset {
 
-  val iterator = JsonIterator.parse(BufferedInputStream(FileInputStream(filename)), 2048)
-  val dataset = Dataset()
+  val examples: JsonArray<*> = Parser().parse(filename) as JsonArray<*>
 
-  while (iterator.readArray()) {
-    while (iterator.readArray()) {
+  @Suppress("UNCHECKED_CAST")
+  return examples.map { example -> example as JsonArray<*>
 
-      val sentence: String = iterator.readString()
-      val classification = CharsClassification()
+    val sentence: String = example[0] as String
+    val classification: CharsClassification = example[1] as CharsClassification
 
-      iterator.readArray()
-      while (iterator.readArray()) classification.add(iterator.readInt())
-
-      dataset.add(AnnotatedSentence(sentence, classification))
-    }
+    AnnotatedSentence(sentence, classification)
   }
-
-  return dataset
 }
 
 /**
@@ -97,9 +89,5 @@ fun shuffleDataset(dataset: Dataset, shuffler: Shuffler): Dataset {
 
   val exampleIndices = ExamplesIndices(size = dataset.size, shuffler = shuffler)
 
-  val shuffledDataset = Dataset()
-
-  exampleIndices.forEach { i -> shuffledDataset.add(dataset[i]) }
-
-  return dataset
+  return exampleIndices.map { i -> dataset[i] }
 }
