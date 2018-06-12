@@ -45,7 +45,7 @@ class TrainingHelper(
   /**
    * The gold classification of the current segment.
    */
-  private lateinit var segmentGoldClassification: ArrayList<Int>
+  private lateinit var segmentGoldClassification: List<Int>
 
   /**
    * Train the [tokenizer] using the chars classifications of the [trainingSet] as reference of correct predictions.
@@ -113,7 +113,7 @@ class TrainingHelper(
    * @param goldClassifications an array containing the correct classification of each character
    * @param batchSize the size of the training batches
    */
-  private fun trainEpoch(text: String, goldClassifications: ArrayList<Int>, batchSize: Int) {
+  private fun trainEpoch(text: String, goldClassifications: CharsClassification, batchSize: Int) {
 
     require(text.length == goldClassifications.size)
 
@@ -146,7 +146,7 @@ class TrainingHelper(
    *
    * @return a Pair containing the start (inclusive) and end (exclusive) indices of the current segment
    */
-  private fun loopSegments(text: String, goldClassifications: ArrayList<Int>) = buildSequence {
+  private fun loopSegments(text: String, goldClassifications: CharsClassification) = buildSequence {
 
     val progress = ProgressIndicatorBar(total = text.length)
     var startIndex = 0
@@ -155,7 +155,7 @@ class TrainingHelper(
 
       val endIndex: Int = minOf(startIndex + this@TrainingHelper.tokenizer.model.maxSegmentSize, text.length)
 
-      this@TrainingHelper.segmentGoldClassification = ArrayList(goldClassifications.subList(startIndex, endIndex))
+      this@TrainingHelper.segmentGoldClassification = goldClassifications.subList(startIndex, endIndex)
 
       yield(Pair(startIndex, endIndex))
 
@@ -178,14 +178,10 @@ class TrainingHelper(
     while (lastSentenceBoundary >= 0 &&
       this.segmentGoldClassification[lastSentenceBoundary] != 1) lastSentenceBoundary--
 
-    return if (lastSentenceBoundary >= 0) {
+    return if (lastSentenceBoundary >= 0)
       lastSentenceBoundary
-
-    } else {
-      val middleTokenBoundary: Int = this.getMiddleTokenBoundary()
-
-      if (middleTokenBoundary >= 0) middleTokenBoundary else segmentSize / 2
-    }
+    else
+      this.getMiddleTokenBoundary().let { if (it >= 0) it else segmentSize / 2 }
   }
 
   /**
@@ -207,6 +203,7 @@ class TrainingHelper(
       this.segmentGoldClassification[middleTokenBoundary] != 0) middleTokenBoundary++
 
     if (middleTokenBoundary >= segmentSize) {
+
       middleTokenBoundary = halfSegmentSize
 
       // search in the first half
