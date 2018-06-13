@@ -65,6 +65,14 @@
         <utils.version>2.1.0</utils.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>jcenter</id>
+            <name>JCenter</name>
+            <url>https://jcenter.bintray.com/</url>
+        </repository>
+    </repositories>
+
     <pluginRepositories>
         <pluginRepository>
             <id>jcenter</id>
