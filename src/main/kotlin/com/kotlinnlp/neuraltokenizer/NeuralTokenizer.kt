@@ -14,7 +14,6 @@ import com.kotlinnlp.simplednn.deeplearning.birnn.BiRNNEncoder
 import com.kotlinnlp.simplednn.simplemath.ndarray.Shape
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArrayFactory
-import kotlin.coroutines.experimental.buildSequence
 
 /**
  * Neural Tokenizer.
@@ -69,7 +68,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
 
     this.sentences = ArrayList()
 
-    this.loopSegments(text).forEach { (startIndex, endIndex) ->
+    this.forEachSegment(text) { (startIndex, endIndex) ->
       this.processSegment(text = text, start = startIndex, end = endIndex)
     }
 
@@ -93,13 +92,13 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
           length = length)))
 
   /**
-   * Loop over the segments of text.
+   * Iterate over the text segments.
    *
    * @param text the text to tokenize
-   *
-   * @return a Pair containing the start (inclusive) and end (exclusive) indices of the current segment
+   * @param callback a callback called for each segment (it takes a pair of <start(inclusive), end(exclusive)> indices
+   *                 as argument)
    */
-  private fun loopSegments(text: String) = buildSequence {
+  private fun forEachSegment(text: String, callback: (Pair<Int, Int>) -> Unit) {
 
     var startIndex = 0
 
@@ -107,7 +106,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
 
       val endIndex: Int = minOf(startIndex + this@NeuralTokenizer.model.maxSegmentSize, text.length)
 
-      yield(Pair(startIndex, endIndex))
+      callback(Pair(startIndex, endIndex))
 
       val lastTokenIndex: Int = this@NeuralTokenizer.getLastTokenEndIndex()
 

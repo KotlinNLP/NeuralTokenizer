@@ -14,7 +14,6 @@ import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
 import java.io.File
 import java.io.FileOutputStream
-import kotlin.coroutines.experimental.buildSequence
 
 /**
  * A helper for the training of a [NeuralTokenizer].
@@ -121,7 +120,7 @@ class TrainingHelper(
 
     this.optimizer.newEpoch()
 
-    this.loopSegments(text = text, goldClassifications = goldClassifications).forEach { (startIndex, endIndex) ->
+    this.forEachSegment(text = text, goldClassifications = goldClassifications) { (startIndex, endIndex) ->
 
       examplesCount++
 
@@ -138,15 +137,17 @@ class TrainingHelper(
   }
 
   /**
-   * Loop over the segments of training extracted shifting the text using the [goldClassifications].
+   * Iterate over the segments of training extracted shifting the text using the [goldClassifications].
    * Before returning the segment, it is classified from the tokenizer and the [segmentGoldClassification] is set.
    *
    * @param text the text to tokenize
    * @param goldClassifications the gold classification of each character of the [text]
-   *
-   * @return a Pair containing the start (inclusive) and end (exclusive) indices of the current segment
+   * @param callback a callback called for each segment (it takes a pair of <start(inclusive), end(exclusive)> indices
+   *                 as argument)
    */
-  private fun loopSegments(text: String, goldClassifications: CharsClassification) = buildSequence {
+  private fun forEachSegment(text: String,
+                              goldClassifications: CharsClassification,
+                              callback: (Pair<Int, Int>) -> Unit) {
 
     val progress = ProgressIndicatorBar(total = text.length)
     var startIndex = 0
@@ -157,7 +158,7 @@ class TrainingHelper(
 
       this@TrainingHelper.segmentGoldClassification = goldClassifications.subList(startIndex, endIndex)
 
-      yield(Pair(startIndex, endIndex))
+      callback(Pair(startIndex, endIndex))
 
       val shiftCharIndex = this@TrainingHelper.getShiftCharIndex()
 
