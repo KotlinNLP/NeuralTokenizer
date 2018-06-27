@@ -7,19 +7,16 @@
 
 package com.kotlinnlp.neuraltokenizer
 
+import com.kotlinnlp.linguisticdescription.sentence.token.RealToken
+import com.kotlinnlp.linguisticdescription.sentence.token.properties.Position
+
 /**
  * Data class containing the properties of a token.
  *
- * @property id the token id
  * @property form the form of the token
- * @property startAt the index of the document at which the token starts
- * @property endAt the index of the document at which the token ends
- * @property isSpace a Boolean indicating if the token is composed of a single spacing char
+ * @property position the position of the token in the original text
  */
 data class Token(
-  val id: Int,
-  val form: String,
-  val startAt: Int,
-  val endAt: Int,
-  val isSpace: Boolean
-)
+  override val form: String,
+  override val position: Position
+) : RealToken
