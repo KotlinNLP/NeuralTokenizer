@@ -18,6 +18,19 @@ import com.kotlinnlp.neuraltokenizer.utils.*
  */
 class ValidationHelper(val tokenizer: NeuralTokenizer) {
 
+  companion object {
+
+    /**
+     * The name of the temporary file in which to write the output of the tokenizer in CoNLL format.
+     */
+    private val OUTPUT_FILENAME = "/tmp/tokenizer_output_validation_corpus_${System.currentTimeMillis()}.conll"
+
+    /**
+     * The name of the temporary file in which to write the test dataset in CoNLL format.
+     */
+    private val TEST_FILENAME = "/tmp/tokenizer_test_validation_corpus_${System.currentTimeMillis()}.conll"
+  }
+
   /**
    * Statistics given by the CoNLL evaluation script.
    *
@@ -34,16 +47,6 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
    * @property f1Score the F1 score
    */
   data class CoNLLStats(val precision: Double, val recall: Double, val f1Score: Double)
-
-  /**
-   * The name of the temporary file in which to write the output of the tokenizer in CoNLL format.
-   */
-  private val OUTPUT_FILENAME = "/tmp/tokenizer_output_validation_corpus_${System.currentTimeMillis()}.conll"
-
-  /**
-   * The name of the temporary file in which to write the test dataset in CoNLL format.
-   */
-  private val TEST_FILENAME = "/tmp/tokenizer_test_validation_corpus_${System.currentTimeMillis()}.conll"
 
   /**
    * When timing started.
@@ -65,12 +68,12 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
 
     CoNLLWriter.toFile(
       sentences = outputSentences.toCoNLLSentences(),
-      outputFilePath = this.OUTPUT_FILENAME,
+      outputFilePath = OUTPUT_FILENAME,
       writeComments = false)
 
     CoNLLWriter.toFile(
       sentences = this.buildDatasetSentences(testSet).toCoNLLSentences(),
-      outputFilePath = this.TEST_FILENAME,
+      outputFilePath = TEST_FILENAME,
       writeComments = false)
 
     val evaluation: String? = CoNLLUEvaluator.evaluate(systemFilePath = OUTPUT_FILENAME, goldFilePath = TEST_FILENAME)
@@ -78,6 +81,7 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
     println("Elapsed time: %s".format(this.formatElapsedTime()))
 
     if (evaluation != null) {
+
       try {
         return this.extractStats(conllEvaluation = evaluation)
       } catch (e: RuntimeException) {
