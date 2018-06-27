@@ -63,6 +63,7 @@
         <klaxon.version>3.0.5</klaxon.version>
         <simplednn.version>0.9.2</simplednn.version>
         <conllio.version>0.2.0</conllio.version>
+        <linguisticdescription.version>0.8.0</linguisticdescription.version>
         <utils.version>2.1.0</utils.version>
     </properties>
 
@@ -297,6 +298,12 @@
             <groupId>com.kotlinnlp</groupId>
             <artifactId>conllio</artifactId>
             <version>${conllio.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.kotlinnlp</groupId>
+            <artifactId>linguisticdescription</artifactId>
+            <version>${linguisticdescription.version}</version>
         </dependency>
 
         <dependency>
