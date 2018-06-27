@@ -49,22 +49,20 @@ private fun ArrayList<Token>.toCoNLLTokens(): ArrayList<CoNLLToken> {
 
   this.forEach { token ->
 
-    if (!token.isSpace) {
-      try {
-        conllTokens.add(CoNLLToken(
-          id = conllTokens.size + 1,
-          form = token.form,
-          lemma = "_",
-          pos = "_",
-          pos2 = "_",
-          feats = mapOf(),
-          head = if (conllTokens.size == 0) 0 else 1,
-          deprel = "_"
-        ))
+    try {
+      conllTokens.add(CoNLLToken(
+        id = conllTokens.size + 1,
+        form = token.form,
+        lemma = "_",
+        pos = "_",
+        pos2 = "_",
+        feats = mapOf(),
+        head = if (conllTokens.size == 0) 0 else 1,
+        deprel = "_"
+      ))
 
-      } catch (e: InvalidTokenForm) {
-        println("Invalid form: %s".format(token.form))
-      }
+    } catch (e: InvalidTokenForm) {
+      println("Invalid form: %s".format(token.form))
     }
   }
 

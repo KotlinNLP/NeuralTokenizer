@@ -7,6 +7,7 @@
 
 package com.kotlinnlp.neuraltokenizer
 
+import com.kotlinnlp.linguisticdescription.sentence.token.properties.Position
 import com.kotlinnlp.neuraltokenizer.utils.AbbreviationsContainer
 import com.kotlinnlp.neuraltokenizer.utils.abbreviations
 import com.kotlinnlp.simplednn.core.neuralprocessor.batchfeedforward.BatchFeedforwardProcessor
@@ -81,15 +82,11 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    * @param length the length of the focus segment
    *
    * @return a list with the classification array of each character
-   *         (0 = token boundary follows, 1 = sequence boundary follows, 2 = no boundary follows)
+   *         (0 = token boundary follows, 1 = sentence boundary follows, 2 = no boundary follows)
    */
   fun classifyChars(text: String, start: Int, length: Int): List<DenseNDArray> =
     this.boundariesClassifier.forward(
-      this.charsEncoder.encode(
-        sequence = this.charsToEmbeddings(
-          text = text,
-          start = start,
-          length = length)))
+      this.charsEncoder.encode(sequence = this.charsToEmbeddings(text = text, start = start, length = length)))
 
   /**
    * Iterate over the text segments.
@@ -118,7 +115,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    * @return the end index of the last token added to the current buffer
    */
   private fun getLastTokenEndIndex(): Int = when {
-    this.curSentenceTokens.size > 0 -> this.curSentenceTokens.last().endAt // new tokens added
+    this.curSentenceTokens.size > 0 -> this.curSentenceTokens.last().position.end // new tokens added
     this.sentences.size > 0 -> this@NeuralTokenizer.sentences.last().endAt // new sentences added
     else -> 0 // first token, no new tokens or sentences added (no boundaries found)
   }
@@ -229,7 +226,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
   }
 
   /**
-   * Associate to each character of the sequence an embeddings vector.
+   * Associate an embeddings vector to each character of the sentence.
    *
    * @param text the whole text to tokenize
    * @param start the start index of the focus segment
@@ -309,6 +306,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    * Process the [char] understanding if a token or a sentence is just ended at the given [charIndex].
    *
    * @param char the char to process
+   * @param nextChar the char following the [char] or null if it is the last
    * @param charIndex the index of the [char] within the text
    * @param charClass the predicted class of the [char]
    */
@@ -317,32 +315,26 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
     val isSpacingChar: Boolean = char.isWhitespace()
 
     if (isSpacingChar && this.curTokenBuffer.isNotEmpty()) { // automatically add the previously buffered token
-      this.addToken(endAt = charIndex - 1, isSpace = false)
+      this.addToken(end = charIndex - 1)
     }
 
-    this.addToBuffers(char)
+    if (!isSpacingChar) {
 
-    if (nextChar == null) {
-      // End of text
-      this.addToken(endAt = charIndex, isSpace = isSpacingChar)
-      this.addSentence(endAt = charIndex)
+      this.addToBuffers(char)
 
-    } else when (charClass) {
-
-      // token boundary follows
-      0 -> if (isSpacingChar || !this.isMiddleOfWord(char, nextChar)) {
-        this.addToken(endAt = charIndex, isSpace = isSpacingChar)
-      }
-
-      // sequence boundary follows
-      1 -> if (isSpacingChar || !this.isMiddleOfWord(char, nextChar)) {
-        this.addToken(endAt = charIndex, isSpace = isSpacingChar)
+      if (nextChar == null) {
+        // End of text
+        this.addToken(end = charIndex)
         this.addSentence(endAt = charIndex)
-      }
 
-      // no boundary follows
-      2 -> if (isSpacingChar) {
-        this.addToken(endAt = charIndex, isSpace = true)
+      } else if (!this.isMiddleOfWord(char, nextChar)) when (charClass) {
+
+        0 -> this.addToken(end = charIndex) // token boundary follows
+
+        1 -> { // sentence boundary follows
+          this.addToken(end = charIndex)
+          this.addSentence(endAt = charIndex)
+        }
       }
     }
   }
@@ -369,46 +361,42 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
   /**
    * Add a new [Token] to the list of tokens of the current sentence.
    *
-   * @param endAt the index of the last character of the token
-   * @param isSpace a Boolean indicating if the token is composed by a single spacing character
+   * @param end the index of the last character of the token
    */
-  private fun addToken(endAt: Int, isSpace: Boolean) {
+  private fun addToken(end: Int) {
 
-    val (id, startAt) = this.getNextTokenIdAndStart()
+    val (index, start) = this.getNextTokenIndexAndStart()
 
     this.curSentenceTokens.add(Token(
-      id = id,
       form = this.curTokenBuffer.toString(),
-      startAt = startAt,
-      endAt = endAt,
-      isSpace = isSpace && startAt == endAt
+      position = Position(index = index, start = start, end = end)
     ))
 
     this.resetCurTokenBuffer()
   }
 
   /**
-   * @return a Pair containing the ID and the start index of the next token
+   * @return a Pair containing the index and the start char index of the next token
    */
-  private fun getNextTokenIdAndStart(): Pair<Int, Int> {
+  private fun getNextTokenIndexAndStart(): Pair<Int, Int> {
 
-    val id: Int
-    val startAt: Int
+    val index: Int
+    val start: Int
 
     if (this.curSentenceTokens.size == 0) {
-      id = 0
-      startAt = if (this.sentences.size > 0)
+      index = 0
+      start = if (this.sentences.size > 0)
         this.sentences.last().endAt + 1
       else
         0
 
     } else {
       val lastToken: Token = this.curSentenceTokens.last()
-      startAt = lastToken.endAt + 1
-      id = lastToken.id + 1
+      start = lastToken.position.end + 1
+      index = lastToken.position.index + 1
     }
 
-    return Pair(id, startAt)
+    return Pair(index, start)
   }
 
   /**
