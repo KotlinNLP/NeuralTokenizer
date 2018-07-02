@@ -41,7 +41,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
   /**
    * The sentences resulting from the tokenization of a text.
    */
-  private var sentences = ArrayList<Sentence>()
+  private val sentences = mutableListOf<Sentence>()
 
   /**
    * The currently buffered token.
@@ -56,7 +56,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
   /**
    * The list of completed tokens of the currently buffered sentence.
    */
-  private var curSentenceTokens: ArrayList<Token> = arrayListOf()
+  private val curSentenceTokens = mutableListOf<Token>()
 
   /**
    * Tokenize the text splitting it in [Sentence]s and [Token]s.
@@ -65,9 +65,9 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    *
    * @return the list of sentences which compose the [text], each containing the list of tokens
    */
-  fun tokenize(text: String): ArrayList<Sentence> {
+  fun tokenize(text: String): List<Sentence> {
 
-    this.sentences = ArrayList()
+    this.sentences.clear()
 
     this.forEachSegment(text) { (startIndex, endIndex) ->
       this.processSegment(text = text, start = startIndex, end = endIndex)
@@ -430,6 +430,6 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    */
   private fun resetCurSentenceBuffer() {
     this.curSentenceBuffer.setLength(0)
-    this.curSentenceTokens = ArrayList()
+    this.curSentenceTokens.clear()
   }
 }

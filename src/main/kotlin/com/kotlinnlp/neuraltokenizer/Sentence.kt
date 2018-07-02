@@ -18,7 +18,7 @@ import com.kotlinnlp.linguisticdescription.sentence.token.properties.Position
  * @property position the position of this sentence in the original text
  */
 data class Sentence(
-  override val tokens: ArrayList<Token>,
+  override val tokens: List<Token>,
   override val position: Position,
   val text: String
 ) : RealSentence<Token>
