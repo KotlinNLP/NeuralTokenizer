@@ -7,19 +7,18 @@
 
 package com.kotlinnlp.neuraltokenizer
 
+import com.kotlinnlp.linguisticdescription.sentence.RealSentence
+import com.kotlinnlp.linguisticdescription.sentence.token.properties.Position
+
 /**
  * Data class containing the properties of a sentence.
  *
- * @property id the sentence id
  * @property text the text of the sentence
- * @property startAt the index of the document at which the sentence starts
- * @property endAt the index of the document at which the sentence ends
  * @property tokens the list of tokens that compose the sentence
+ * @property position the position of this sentence in the original text
  */
 data class Sentence(
-  val id: Int,
-  val text: String,
-  val startAt: Int,
-  val endAt: Int,
-  val tokens: ArrayList<Token>
-)
+  override val tokens: ArrayList<Token>,
+  override val position: Position,
+  val text: String
+) : RealSentence<Token>
