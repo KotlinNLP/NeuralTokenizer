@@ -43,7 +43,7 @@ fun List<Sentence>.toCoNLLSentences(): List<CoNLLSentence> {
  *
  * @return an [ArrayList] of [com.kotlinnlp.conllio.Token]s
  */
-private fun ArrayList<Token>.toCoNLLTokens(): ArrayList<CoNLLToken> {
+private fun List<Token>.toCoNLLTokens(): ArrayList<CoNLLToken> {
 
   val conllTokens = ArrayList<CoNLLToken>()
 
@@ -74,7 +74,7 @@ private fun ArrayList<Token>.toCoNLLTokens(): ArrayList<CoNLLToken> {
  *
  * @return a [List] of [List]s of [String]s
  */
-fun ArrayList<Sentence>.toNestedStringsList(): List<List<String>> = List(
+fun List<Sentence>.toNestedStringsList(): List<List<String>> = List(
   size = this.size,
   init = { i -> this[i].tokens.toStringsList() }
 )
@@ -84,7 +84,7 @@ fun ArrayList<Sentence>.toNestedStringsList(): List<List<String>> = List(
  *
  * @return a [List] of [String]s
  */
-private fun ArrayList<Token>.toStringsList(): List<String> = List(
+private fun List<Token>.toStringsList(): List<String> = List(
   size = this.size,
   init = { i -> this[i].form }
 )
