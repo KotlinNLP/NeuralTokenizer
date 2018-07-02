@@ -11,23 +11,23 @@ import com.kotlinnlp.conllio.Token.InvalidTokenForm
 import com.kotlinnlp.neuraltokenizer.Sentence
 import com.kotlinnlp.neuraltokenizer.Token
 
-typealias CoNLLSentence = com.kotlinnlp.conllio.Sentence
-typealias CoNLLToken = com.kotlinnlp.conllio.Token
+typealias CoNLLIOSentence = com.kotlinnlp.conllio.Sentence
+typealias CoNLLIOToken = com.kotlinnlp.conllio.Token
 
 /**
  * Convert a list of [Sentence]s into a list of [com.kotlinnlp.conllio.Sentence]s.
  *
  * @return a list of [com.kotlinnlp.conllio.Sentence]s
  */
-fun List<Sentence>.toCoNLLSentences(): List<CoNLLSentence> {
+fun List<Sentence>.toCoNLLIOSentences(): List<CoNLLIOSentence> {
 
-  val conllSentences = mutableListOf<CoNLLSentence>()
+  val conllSentences = mutableListOf<CoNLLIOSentence>()
 
   this.forEachIndexed { i, sentence ->
-    val tokens = sentence.tokens.toCoNLLTokens().toTypedArray()
+    val tokens = sentence.tokens.toCoNLLIOTokens().toTypedArray()
 
     if (tokens.isNotEmpty()) {
-      conllSentences.add(CoNLLSentence(
+      conllSentences.add(CoNLLIOSentence(
         sentenceId = i.toString(),
         text = sentence.text,
         tokens = tokens
@@ -39,18 +39,18 @@ fun List<Sentence>.toCoNLLSentences(): List<CoNLLSentence> {
 }
 
 /**
- * Convert an [ArrayList] of [Token]s into an [ArrayList] of [com.kotlinnlp.conllio.Token]s.
+ * Convert a list of [Token]s into a list of [CoNLLIOToken]s.
  *
- * @return an [ArrayList] of [com.kotlinnlp.conllio.Token]s
+ * @return a list of [CoNLLIOToken]s
  */
-private fun List<Token>.toCoNLLTokens(): ArrayList<CoNLLToken> {
+private fun List<Token>.toCoNLLIOTokens(): List<CoNLLIOToken> {
 
-  val conllTokens = ArrayList<CoNLLToken>()
+  val conllTokens = mutableListOf<CoNLLIOToken>()
 
   this.forEach { token ->
 
     try {
-      conllTokens.add(CoNLLToken(
+      conllTokens.add(CoNLLIOToken(
         id = conllTokens.size + 1,
         form = token.form,
         lemma = "_",

@@ -67,12 +67,12 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
     val outputSentences: List<Sentence> = tokenizer.tokenize(text = mergeDataset(testSet).first)
 
     CoNLLWriter.toFile(
-      sentences = outputSentences.toCoNLLSentences(),
+      sentences = outputSentences.toCoNLLIOSentences(),
       outputFilePath = OUTPUT_FILENAME,
       writeComments = false)
 
     CoNLLWriter.toFile(
-      sentences = this.buildDatasetSentences(testSet).toCoNLLSentences(),
+      sentences = this.buildDatasetSentences(testSet).toCoNLLIOSentences(),
       outputFilePath = TEST_FILENAME,
       writeComments = false)
 
