@@ -68,23 +68,3 @@ private fun List<Token>.toCoNLLTokens(): ArrayList<CoNLLToken> {
 
   return conllTokens
 }
-
-/**
- * Convert an [ArrayList] of [Sentence]s into a [List] of tokens (a [List] of [String]s themselves).
- *
- * @return a [List] of [List]s of [String]s
- */
-fun List<Sentence>.toNestedStringsList(): List<List<String>> = List(
-  size = this.size,
-  init = { i -> this[i].tokens.toStringsList() }
-)
-
-/**
- * Convert an [ArrayList] of [Token]s into a [List] of [String]s.
- *
- * @return a [List] of [String]s
- */
-private fun List<Token>.toStringsList(): List<String> = List(
-  size = this.size,
-  init = { i -> this[i].form }
-)
