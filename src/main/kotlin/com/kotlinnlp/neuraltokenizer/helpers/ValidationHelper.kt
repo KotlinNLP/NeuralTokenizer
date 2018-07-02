@@ -64,7 +64,7 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
 
     this.startTiming()
 
-    val outputSentences = tokenizer.tokenize(text = mergeDataset(testSet).first)
+    val outputSentences: List<Sentence> = tokenizer.tokenize(text = mergeDataset(testSet).first)
 
     CoNLLWriter.toFile(
       sentences = outputSentences.toCoNLLSentences(),
@@ -100,24 +100,14 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
    *
    * @return a list of [Sentence]s
    */
-  private fun buildDatasetSentences(dataset: Dataset): ArrayList<Sentence> {
-
-    val sentences = ArrayList<Sentence>()
-    val textLen = 0
-
-    dataset.forEachIndexed { sentenceId, (sentence, charsClassification) ->
-
-      sentences.add(Sentence(
-        id = sentenceId,
+  private fun buildDatasetSentences(dataset: Dataset): List<Sentence> =
+    dataset.mapIndexed { i, (sentence, charsClassification) ->
+      Sentence(
         text = sentence,
-        startAt = textLen,
-        endAt = textLen + sentence.length,
+        position = Position(index = i, start = 0, end = sentence.lastIndex),
         tokens = this.buildDatasetTokens(sentence = sentence, charsClassification = charsClassification)
-      ))
+      )
     }
-
-    return sentences
-  }
 
   /**
    * Build a tokens list from the given [sentence] string and its [charsClassification].

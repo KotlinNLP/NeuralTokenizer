@@ -15,13 +15,13 @@ typealias CoNLLSentence = com.kotlinnlp.conllio.Sentence
 typealias CoNLLToken = com.kotlinnlp.conllio.Token
 
 /**
- * Convert an [ArrayList] of [Sentence]s into an [ArrayList] of [com.kotlinnlp.conllio.Sentence]s.
+ * Convert a list of [Sentence]s into a list of [com.kotlinnlp.conllio.Sentence]s.
  *
- * @return an [ArrayList] of [com.kotlinnlp.conllio.Sentence]s
+ * @return a list of [com.kotlinnlp.conllio.Sentence]s
  */
-fun ArrayList<Sentence>.toCoNLLSentences(): ArrayList<CoNLLSentence> {
+fun List<Sentence>.toCoNLLSentences(): List<CoNLLSentence> {
 
-  val conllSentences = ArrayList<CoNLLSentence>()
+  val conllSentences = mutableListOf<CoNLLSentence>()
 
   this.forEachIndexed { i, sentence ->
     val tokens = sentence.tokens.toCoNLLTokens().toTypedArray()
