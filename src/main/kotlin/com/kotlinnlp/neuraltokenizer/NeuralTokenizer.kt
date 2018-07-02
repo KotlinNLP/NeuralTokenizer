@@ -116,7 +116,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    */
   private fun getLastTokenEndIndex(): Int = when {
     this.curSentenceTokens.size > 0 -> this.curSentenceTokens.last().position.end // new tokens added
-    this.sentences.size > 0 -> this@NeuralTokenizer.sentences.last().endAt // new sentences added
+    this.sentences.size > 0 -> this@NeuralTokenizer.sentences.last().position.end // new sentences added
     else -> 0 // first token, no new tokens or sentences added (no boundaries found)
   }
 
@@ -386,7 +386,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
     if (this.curSentenceTokens.size == 0) {
       index = 0
       start = if (this.sentences.size > 0)
-        this.sentences.last().endAt + 1
+        this.sentences.last().position.end + 1
       else
         0
 
@@ -406,14 +406,12 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    */
   private fun addSentence(endAt: Int) {
 
-    val id: Int = if (this.sentences.size == 0) 0 else this.sentences.last().id + 1
-    val startAt: Int = if (this.sentences.size == 0) 0 else this.sentences.last().endAt + 1
+    val index: Int = this.sentences.size
+    val startAt: Int = if (this.sentences.size == 0) 0 else this.sentences.last().position.end + 1
 
     this.sentences.add(Sentence(
-      id = id,
       text = this.curSentenceBuffer.toString(),
-      startAt = startAt,
-      endAt = endAt,
+      position = Position(index = index, start = startAt, end = endAt),
       tokens = this.curSentenceTokens
     ))
 
