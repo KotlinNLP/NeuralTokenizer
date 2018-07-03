@@ -13,12 +13,36 @@ import com.kotlinnlp.linguisticdescription.sentence.token.properties.Position
 /**
  * Data class containing the properties of a sentence.
  *
- * @property text the text of the sentence
  * @property tokens the list of tokens that compose the sentence
  * @property position the position of this sentence in the original text
  */
 data class Sentence(
   override val tokens: List<Token>,
-  override val position: Position,
-  val text: String
-) : RealSentence<Token>
+  override val position: Position
+) : RealSentence<Token> {
+
+  companion object {
+
+    private const val TOKENS_SEPARATOR = " "
+  }
+
+  /**
+   * The text of this sentence
+   */
+  val text: String by lazy {
+
+    val text = StringBuffer()
+
+    this.tokens.forEach {
+      text.append(TOKENS_SEPARATOR.repeat(it.position.start - text.length))
+      text.append(it.form)
+    }
+
+   text.toString()
+  }
+
+  /**
+   * The length of this sentence.
+   */
+  val length: Int = this.position.end - this.position.start + 1
+}
