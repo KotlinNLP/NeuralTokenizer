@@ -7,9 +7,8 @@
 
 package com.kotlinnlp.neuraltokenizer.helpers
 
-import com.kotlinnlp.conllio.CoNLLUEvaluator
-import com.kotlinnlp.conllio.CoNLLWriter
 import com.kotlinnlp.linguisticdescription.sentence.token.properties.Position
+import com.kotlinnlp.linguisticdescription.sentence.token.properties.Positionable
 import com.kotlinnlp.neuraltokenizer.*
 import com.kotlinnlp.neuraltokenizer.utils.*
 
@@ -17,19 +16,6 @@ import com.kotlinnlp.neuraltokenizer.utils.*
  * A helper for the validation of a [NeuralTokenizer].
  */
 class ValidationHelper(val tokenizer: NeuralTokenizer) {
-
-  companion object {
-
-    /**
-     * The name of the temporary file in which to write the output of the tokenizer in CoNLL format.
-     */
-    private val OUTPUT_FILENAME = "/tmp/tokenizer_output_validation_corpus_${System.currentTimeMillis()}.conll"
-
-    /**
-     * The name of the temporary file in which to write the test dataset in CoNLL format.
-     */
-    private val TEST_FILENAME = "/tmp/tokenizer_test_validation_corpus_${System.currentTimeMillis()}.conll"
-  }
 
   /**
    * Statistics given by the CoNLL evaluation script.
@@ -64,33 +50,25 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
 
     this.startTiming()
 
-    val outputSentences: List<Sentence> = tokenizer.tokenize(text = mergeDataset(testSet).first)
-
-    CoNLLWriter.toFile(
-      sentences = outputSentences.toCoNLLIOSentences(),
-      outputFilePath = OUTPUT_FILENAME,
-      writeComments = false)
-
-    CoNLLWriter.toFile(
-      sentences = this.buildDatasetSentences(testSet).toCoNLLIOSentences(),
-      outputFilePath = TEST_FILENAME,
-      writeComments = false)
-
-    val evaluation: String? = CoNLLUEvaluator.evaluate(systemFilePath = OUTPUT_FILENAME, goldFilePath = TEST_FILENAME)
+    val outputSentences: List<Sentence> = this.tokenizer.tokenize(text = mergeDataset(testSet).first)
+    val goldSentences: List<Sentence> = this.buildDatasetSentences(testSet)
 
     println("Elapsed time: %s".format(this.formatElapsedTime()))
 
-    if (evaluation != null) {
-
-      try {
-        return this.extractStats(conllEvaluation = evaluation)
-      } catch (e: RuntimeException) {
-        throw RuntimeException("Invalid output of the CoNLL evaluation script: $evaluation")
-      }
-
-    } else {
-      throw RuntimeException("CoNLL evaluation script gave an error")
-    }
+    return EvaluationStats(
+      tokens = this.buildMetricStats(
+        correct = outputSentences.zip(goldSentences).sumBy {
+          this.countSamePositionElements(it.first.tokens, it.second.tokens)
+        },
+        outputTotal = outputSentences.sumBy { it.tokens.size },
+        goldTotal = goldSentences.sumBy { it.tokens.size }
+      ),
+      sentences = this.buildMetricStats(
+        correct = this.countSamePositionElements(outputSentences, goldSentences),
+        outputTotal = outputSentences.size,
+        goldTotal = goldSentences.size
+      )
+    )
   }
 
   /**
@@ -139,32 +117,38 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
   }
 
   /**
-   * @param conllEvaluation the evaluation string given by the CoNLL evaluation script
    *
-   * @return CoNLL statistics for Tokens and Sentences
    */
-  private fun extractStats(conllEvaluation: String): EvaluationStats {
+  private fun countSamePositionElements(elements1: List<Positionable>, elements2: List<Positionable>): Int {
 
-    val evalLines: List<String> = conllEvaluation.split("\n")
+    var correct = 0
+    var index2 = 0
 
-    return EvaluationStats(  // skip first fields (headers)
-      tokens = this.extractMetricStats(evalLines[2]),
-      sentences = this.extractMetricStats(evalLines[3]))
+    elements1.forEach { element1 ->
+
+      while (index2 < elements2.lastIndex && elements2[index2].position.end < element1.position.end) index2++
+
+      if (elements2[index2].position == element1.position) correct++
+    }
+
+    return correct
   }
 
   /**
-   * @param conllEvalLine a line of the output of the CoNLL evaluation script
+   * @param correct the number of correct elements
+   * @param outputTotal the total amount of elements found
+   * @param goldTotal the total amount of gold elements
    *
-   * @return CoNLL statistics for a single metric: Precision, Recall and F1 Score
+   * @return CoNLL statistics (precision, recall and F1 score) for a single metric
    */
-  private fun extractMetricStats(conllEvalLine: String): CoNLLStats {
+  private fun buildMetricStats(correct: Int, outputTotal: Int, goldTotal: Int): CoNLLStats {
 
-    val fields: List<String> = conllEvalLine.split("|")
+    val correctDouble: Double = correct.toDouble()
 
     return CoNLLStats( // skip first field (metrics)
-      precision = fields[1].trim().toDouble() / 100.0,
-      recall = fields[2].trim().toDouble() / 100.0,
-      f1Score = fields[3].trim().toDouble() / 100.0)
+      precision = correctDouble / outputTotal,
+      recall = correctDouble / goldTotal,
+      f1Score = 2 * correctDouble / (outputTotal + goldTotal))
   }
 
   /**
