@@ -49,11 +49,6 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
   private var curTokenBuffer = StringBuffer()
 
   /**
-   * The currently buffered sentence.
-   */
-  private val curSentenceBuffer = StringBuffer()
-
-  /**
    * The list of completed tokens of the currently buffered sentence.
    */
   private val curSentenceTokens = mutableListOf<Token>()
@@ -178,13 +173,12 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
   }
 
   /**
-   * Shift buffers of an amount of chars equal to half segment.
+   * Shift the token buffer of an amount of chars equal to half segment.
    */
   private fun shiftHalfBuffer() {
 
     val halfSegmentSize: Int = this.model.maxSegmentSize / 2
 
-    this.curSentenceBuffer.delete(this.curSentenceBuffer.length - halfSegmentSize, this.curSentenceBuffer.length)
     this.curTokenBuffer.delete(this.curTokenBuffer.length - halfSegmentSize, this.curTokenBuffer.length)
   }
 
@@ -206,10 +200,6 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
       tokensCharsCount += token.form.length
       curSegmentTokensToKeep++
     }
-
-    val sentencePrevLength: Int = (0 until sentencePrevTokensCount).sumBy { i -> this.curSentenceTokens[i].form.length }
-    val deleteFrom: Int = sentencePrevLength + tokensCharsCount
-    this.curSentenceBuffer.delete(deleteFrom, this.curSentenceBuffer.length)
 
     val tokensToKeep: Int = sentencePrevTokensCount + curSegmentTokensToKeep
     (tokensToKeep until this.curSentenceTokens.size).reversed().forEach { i -> this.curSentenceTokens.removeAt(i) }
@@ -321,7 +311,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
 
     if (!isSpacingChar) {
 
-      this.addToBuffers(char)
+      this.addToBuffer(char)
 
       if (nextChar == null) {
         // End of text
@@ -350,13 +340,12 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
     = !this@NeuralTokenizer.useScriptioContinua && nextChar.isLetterOrDigit() && char.isLetterOrDigit()
 
   /**
-   * Add the given [char] to the token and sentence buffers.
+   * Add the given [char] to the token buffer.
    *
    * @param char the char to add
    */
-  private fun addToBuffers(char: Char) {
+  private fun addToBuffer(char: Char) {
     this.curTokenBuffer.append(char)
-    this.curSentenceBuffer.append(char)
   }
 
   /**
@@ -429,7 +418,6 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    * Reset the currently buffered sentence.
    */
   private fun resetCurSentenceBuffer() {
-    this.curSentenceBuffer.setLength(0)
     this.curSentenceTokens.clear()
   }
 }
