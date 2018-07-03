@@ -54,6 +54,11 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
   private val curSentenceTokens = mutableListOf<Token>()
 
   /**
+   * The number of spacing chars skipped after the last token added.
+   */
+  private var skippedSpacingChars = 0
+
+  /**
    * Tokenize the text splitting it in [Sentence]s and [Token]s.
    *
    * @param text the text to tokenize
@@ -309,7 +314,11 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
       this.addToken(end = charIndex - 1)
     }
 
-    if (!isSpacingChar) {
+    if (isSpacingChar) {
+
+      this.skippedSpacingChars++
+
+    } else {
 
       this.addToBuffer(char)
 
@@ -327,6 +336,8 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
           this.addSentence(endAt = charIndex)
         }
       }
+
+      this.skippedSpacingChars = 0
     }
   }
 
@@ -375,14 +386,11 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
 
     if (this.curSentenceTokens.size == 0) {
       index = 0
-      start = if (this.sentences.size > 0)
-        this.sentences.last().position.end + 1
-      else
-        0
+      start = if (this.sentences.size > 0) (this.sentences.last().position.end + 1) else 0
 
     } else {
       val lastToken: Token = this.curSentenceTokens.last()
-      start = lastToken.position.end + 1
+      start = lastToken.position.end + this.skippedSpacingChars + 1
       index = lastToken.position.index + 1
     }
 
