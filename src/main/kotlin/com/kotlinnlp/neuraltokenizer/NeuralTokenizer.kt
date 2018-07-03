@@ -412,7 +412,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
     this.sentences.add(Sentence(
       text = this.curSentenceBuffer.toString(),
       position = Position(index = index, start = startAt, end = endAt),
-      tokens = this.curSentenceTokens
+      tokens = this.curSentenceTokens.toList() // it must be a copy
     ))
 
     this.resetCurSentenceBuffer()
