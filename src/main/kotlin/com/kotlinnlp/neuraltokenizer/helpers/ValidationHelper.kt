@@ -53,14 +53,12 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
 
     return EvaluationStats(
       tokens = this.buildMetricStats(
-        correct = outputSentences.zip(goldSentences).sumBy {
-          this.countSamePositionElements(it.first.tokens, it.second.tokens)
-        },
+        correct = this.countSamePositionElements(outputSentences.getOffsetTokens(), goldSentences.getOffsetTokens()),
         outputTotal = outputSentences.sumBy { it.tokens.size },
         goldTotal = goldSentences.sumBy { it.tokens.size }
       ),
       sentences = this.buildMetricStats(
-        correct = this.countSamePositionElements(outputSentences, goldSentences),
+        correct = this.countSamePositionElements(outputSentences.copyWithOffset(), goldSentences.copyWithOffset()),
         outputTotal = outputSentences.size,
         goldTotal = goldSentences.size
       )
@@ -113,7 +111,52 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
   }
 
   /**
+   * Copy this list of sentences, adding an incremental offset to their position, in order to simulate a unique text
+   * composed by the sequence of all the sentences.
    *
+   * @return a list containing a copy of all the sentences as a unique sequence
+   */
+  private fun List<Sentence>.copyWithOffset(): List<Sentence> {
+
+    var offset = 0
+
+    return this.map {
+
+      val curOffset: Int = offset - it.position.start
+
+      offset += it.text.length
+
+      it.copy(position = it.position.copy(start = it.position.start + curOffset, end = it.position.end + curOffset))
+    }
+  }
+
+  /**
+   * Get a list with all the tokens of the sentences, with an incremental offset added to their position, in order to
+   * simulate a unique text composed by the sequence of all the tokens.
+   *
+   * @return a list containing a copy of all the tokens as a unique sequence
+   */
+  private fun List<Sentence>.getOffsetTokens(): List<Token> {
+
+    var offset = 0
+
+    return this.flatMap {
+
+      val curOffset: Int = offset - it.position.start
+
+      offset += it.text.length
+
+      it.tokens.map {
+        it.copy(position = it.position.copy(start = it.position.start + curOffset, end = it.position.end + curOffset))
+      }
+    }
+  }
+
+  /**
+   * @param elements1 a list of positionable elements
+   * @param elements2 a list of positionable elements
+   *
+   * @return the count of elements that have the same position within the two lists
    */
   private fun countSamePositionElements(elements1: List<Positionable>, elements2: List<Positionable>): Int {
 
