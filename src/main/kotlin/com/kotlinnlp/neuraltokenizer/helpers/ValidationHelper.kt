@@ -11,6 +11,7 @@ import com.kotlinnlp.linguisticdescription.sentence.token.properties.Position
 import com.kotlinnlp.linguisticdescription.sentence.token.properties.Positionable
 import com.kotlinnlp.neuraltokenizer.*
 import com.kotlinnlp.neuraltokenizer.utils.*
+import com.kotlinnlp.utils.Timer
 
 /**
  * A helper for the validation of a [NeuralTokenizer].
@@ -35,11 +36,6 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
   data class CoNLLStats(val precision: Double, val recall: Double, val f1Score: Double)
 
   /**
-   * When timing started.
-   */
-  private var startTime: Long = 0
-
-  /**
    * Validate the [tokenizer] using the given test dataset.
    *
    * @param testSet the test dataset to validate the [tokenizer]
@@ -48,12 +44,12 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
    */
   fun validate(testSet: Dataset): EvaluationStats {
 
-    this.startTiming()
+    val timer = Timer()
 
     val outputSentences: List<Sentence> = this.tokenizer.tokenize(text = mergeDataset(testSet).first)
     val goldSentences: List<Sentence> = this.buildDatasetSentences(testSet)
 
-    println("Elapsed time: %s".format(this.formatElapsedTime()))
+    println("Elapsed time: %s".format(timer.formatElapsedTime()))
 
     return EvaluationStats(
       tokens = this.buildMetricStats(
@@ -149,23 +145,5 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
       precision = correctDouble / outputTotal,
       recall = correctDouble / goldTotal,
       f1Score = 2 * correctDouble / (outputTotal + goldTotal))
-  }
-
-  /**
-   * Start registering time.
-   */
-  private fun startTiming() {
-    this.startTime = System.currentTimeMillis()
-  }
-
-  /**
-   * @return the formatted string with elapsed time in seconds and minutes.
-   */
-  private fun formatElapsedTime(): String {
-
-    val elapsedTime = System.currentTimeMillis() - this.startTime
-    val elapsedSecs = elapsedTime / 1000.0
-
-    return "%.3f s (%.1f min)".format(elapsedSecs, elapsedSecs / 60.0)
   }
 }
