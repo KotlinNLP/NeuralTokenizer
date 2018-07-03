@@ -134,6 +134,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
     val sentencePrevTokensCount: Int = this.curSentenceTokens.size
 
     charsClassification.forEachIndexed { i, charClassification ->
+
       val textIndex: Int = start + i
 
       this.processChar(
@@ -410,7 +411,6 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
     val startAt: Int = if (this.sentences.size == 0) 0 else this.sentences.last().position.end + 1
 
     this.sentences.add(Sentence(
-      text = this.curSentenceBuffer.toString(),
       position = Position(index = index, start = startAt, end = endAt),
       tokens = this.curSentenceTokens.toList() // it must be a copy
     ))

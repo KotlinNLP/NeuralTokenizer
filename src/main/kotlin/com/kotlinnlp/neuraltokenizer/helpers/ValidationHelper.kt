@@ -75,7 +75,6 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
   private fun buildDatasetSentences(dataset: Dataset): List<Sentence> =
     dataset.mapIndexed { i, (sentence, charsClassification) ->
       Sentence(
-        text = sentence,
         position = Position(index = i, start = 0, end = sentence.lastIndex),
         tokens = this.buildDatasetTokens(sentence = sentence, charsClassification = charsClassification)
       )
@@ -124,7 +123,7 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
 
       val curOffset: Int = offset - it.position.start
 
-      offset += it.text.length
+      offset += it.length
 
       it.copy(position = it.position.copy(start = it.position.start + curOffset, end = it.position.end + curOffset))
     }
@@ -144,7 +143,7 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
 
       val curOffset: Int = offset - it.position.start
 
-      offset += it.text.length
+      offset += it.length
 
       it.tokens.map {
         it.copy(position = it.position.copy(start = it.position.start + curOffset, end = it.position.end + curOffset))
