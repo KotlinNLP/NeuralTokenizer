@@ -37,7 +37,7 @@ data class Sentence(
   val text: String by lazy {
 
     val text = StringBuffer()
-    var lastTokenEnd = 0
+    var lastTokenEnd = this.position.start
 
     this.tokens.forEach {
 
