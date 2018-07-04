@@ -123,7 +123,7 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
 
       val curOffset: Int = offset - it.position.start
 
-      offset += it.length
+      offset += it.position.length
 
       it.copy(position = it.position.copy(start = it.position.start + curOffset, end = it.position.end + curOffset))
     }
@@ -143,7 +143,7 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
 
       val curOffset: Int = offset - it.position.start
 
-      offset += it.length
+      offset += it.position.length
 
       it.tokens.map {
         it.copy(position = it.position.copy(start = it.position.start + curOffset, end = it.position.end + curOffset))

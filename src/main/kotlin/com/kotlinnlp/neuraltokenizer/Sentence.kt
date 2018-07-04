@@ -40,9 +40,4 @@ data class Sentence(
 
    text.toString()
   }
-
-  /**
-   * The length of this sentence.
-   */
-  val length: Int = this.position.end - this.position.start + 1
 }
