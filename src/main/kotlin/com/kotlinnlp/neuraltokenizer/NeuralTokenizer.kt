@@ -68,7 +68,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    */
   fun tokenize(text: String): List<Sentence> {
 
-    this.sentences.clear()
+    this.initializeTokenization()
 
     this.forEachSegment(text) { (startIndex, endIndex) ->
       this.processSegment(text = text, start = startIndex, end = endIndex)
@@ -88,6 +88,15 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
   fun classifyChars(text: String, start: Int, length: Int): List<DenseNDArray> =
     this.boundariesClassifier.forward(
       this.charsEncoder.encode(sequence = this.charsToEmbeddings(text = text, start = start, length = length)))
+
+  /**
+   * Initialize variables used during the tokenization.
+   */
+  private fun initializeTokenization() {
+
+    this.sentences.clear()
+    this.skippedSpacingChars = 0
+  }
 
   /**
    * Iterate over the text segments.
@@ -311,9 +320,8 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
 
     val isSpacingChar: Boolean = char.isWhitespace()
 
-    if (isSpacingChar && this.curTokenBuffer.isNotEmpty()) { // automatically add the previously buffered token
-      this.addToken(end = charIndex - 1)
-    }
+    if (isSpacingChar && this.curTokenBuffer.isNotEmpty())
+      this.addToken(end = charIndex - 1) // automatically add the previously buffered token
 
     if (isSpacingChar) {
 
@@ -323,10 +331,8 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
 
       this.addToBuffer(char)
 
-      if (nextChar == null) {
-        // End of text
+      if (nextChar == null) { // End of text
         this.addToken(end = charIndex)
-        this.addSentence(endAt = charIndex)
 
       } else if (!this.isMiddleOfWord(char, nextChar)) when (charClass) {
 
@@ -338,6 +344,8 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
         }
       }
     }
+
+    if (nextChar == null) this.addSentence(endAt = charIndex) // End of text
   }
 
   /**
