@@ -107,17 +107,16 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    */
   private fun forEachSegment(text: String, callback: (Pair<Int, Int>) -> Unit) {
 
+    val tokenizer = this@NeuralTokenizer
     var startIndex = 0
 
     while (startIndex < text.length) {
 
-      val endIndex: Int = minOf(startIndex + this@NeuralTokenizer.model.maxSegmentSize, text.length)
+      val endIndex: Int = minOf(startIndex + tokenizer.model.maxSegmentSize, text.length)
 
       callback(Pair(startIndex, endIndex))
 
-      val lastTokenIndex: Int = this@NeuralTokenizer.getLastTokenEndIndex()
-
-      startIndex = lastTokenIndex + this.skippedSpacingChars + this@NeuralTokenizer.curTokenBuffer.length + 1
+      startIndex = tokenizer.getLastTokenEndIndex() + this.skippedSpacingChars + tokenizer.curTokenBuffer.length + 1
     }
   }
 
@@ -206,23 +205,39 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    */
   private fun shiftBufferByTokens(sentencePrevTokensCount: Int) {
 
-    val curSegmentTokens = this.curSentenceTokens.subList(sentencePrevTokensCount, this.curSentenceTokens.size)
-    val tokensIterator = curSegmentTokens.iterator()
-    var lastTokenEnd = curSegmentTokens.first().position.start - 1
-    var tokensCharsCount = 0
-    var curSegmentTokensToKeep = 0
+    val curSegmentTokens: List<Token> =
+      this.curSentenceTokens.subList(sentencePrevTokensCount, this.curSentenceTokens.size)
 
-    while (tokensIterator.hasNext() && tokensCharsCount < this.model.maxSegmentSize / 2) {
-      val token: Token = tokensIterator.next()
-      tokensCharsCount += token.position.end - lastTokenEnd
-      lastTokenEnd = token.position.end
-      curSegmentTokensToKeep++
-    }
+    val tokensToKeep: Int = sentencePrevTokensCount + this.getSegmentTokensToKeep(curSegmentTokens)
 
-    val tokensToKeep: Int = sentencePrevTokensCount + curSegmentTokensToKeep
     (tokensToKeep until this.curSentenceTokens.size).reversed().forEach { i -> this.curSentenceTokens.removeAt(i) }
 
     this.resetCurTokenBuffer()
+  }
+
+  /**
+   * @param segment a segment of tokens
+   *
+   * @return the number of segment tokens to keep, following the rule of the [shiftBufferByTokens] method
+   */
+  private fun getSegmentTokensToKeep(segment: Iterable<Token>): Int {
+
+    val tokensIterator = segment.iterator()
+    var lastTokenEnd = segment.first().position.start - 1
+    var tokensCharsCount = 0
+    var tokensToKeep = 0
+
+    while (tokensIterator.hasNext() && tokensCharsCount < this.model.maxSegmentSize / 2) {
+
+      val token: Token = tokensIterator.next()
+
+      tokensCharsCount += token.position.end - lastTokenEnd
+      lastTokenEnd = token.position.end
+
+      tokensToKeep++
+    }
+
+    return tokensToKeep
   }
 
   /**
