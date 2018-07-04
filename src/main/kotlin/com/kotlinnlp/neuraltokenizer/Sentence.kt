@@ -23,6 +23,11 @@ data class Sentence(
 
   companion object {
 
+    /**
+     * A separator used to construct the text of the sentence.
+     * One or more separators are put between tokens when there is a gap between the end of a token and the start of
+     * the following one.
+     */
     private const val TOKENS_SEPARATOR = " "
   }
 
@@ -32,10 +37,14 @@ data class Sentence(
   val text: String by lazy {
 
     val text = StringBuffer()
+    var lastTokenEnd = 0
 
     this.tokens.forEach {
-      text.append(TOKENS_SEPARATOR.repeat(it.position.start - text.length))
+
+      text.append(TOKENS_SEPARATOR.repeat(it.position.start - lastTokenEnd)) // multi-spaces separator
       text.append(it.form)
+
+      lastTokenEnd = it.position.end
     }
 
    text.toString()
