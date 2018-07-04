@@ -45,20 +45,21 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
   fun validate(testSet: Dataset): EvaluationStats {
 
     val timer = Timer()
-
-    val outputSentences: List<Sentence> = this.tokenizer.tokenize(text = mergeDataset(testSet).first)
-    val goldSentences: List<Sentence> = this.buildDatasetSentences(testSet)
+    val outputSentences: List<Sentence> = this.tokenizer.tokenize(text = mergeDataset(testSet).first).fixOffset()
+    val goldSentences: List<Sentence> = this.buildDatasetSentences(testSet).fixOffset()
+    val outputTokens: List<Token> = outputSentences.flatMap { it.tokens }
+    val goldTokens: List<Token> = goldSentences.flatMap { it.tokens }
 
     println("Elapsed time: %s".format(timer.formatElapsedTime()))
 
     return EvaluationStats(
       tokens = this.buildMetricStats(
-        correct = this.countSamePositionElements(outputSentences.getOffsetTokens(), goldSentences.getOffsetTokens()),
+        correct = this.countSamePositionElements(outputTokens, goldTokens),
         outputTotal = outputSentences.sumBy { it.tokens.size },
         goldTotal = goldSentences.sumBy { it.tokens.size }
       ),
       sentences = this.buildMetricStats(
-        correct = this.countSamePositionElements(outputSentences.copyWithOffset(), goldSentences.copyWithOffset()),
+        correct = this.countSamePositionElements(outputSentences, goldSentences),
         outputTotal = outputSentences.size,
         goldTotal = goldSentences.size
       )
@@ -115,7 +116,7 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
    *
    * @return a list containing a copy of all the sentences as a unique sequence
    */
-  private fun List<Sentence>.copyWithOffset(): List<Sentence> {
+  private fun List<Sentence>.fixOffset(): List<Sentence> {
 
     var offset = 0
 
@@ -125,29 +126,12 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
 
       offset += it.position.length
 
-      it.copy(position = it.position.copy(start = it.position.start + curOffset, end = it.position.end + curOffset))
-    }
-  }
-
-  /**
-   * Get a list with all the tokens of the sentences, with an incremental offset added to their position, in order to
-   * simulate a unique text composed by the sequence of all the tokens.
-   *
-   * @return a list containing a copy of all the tokens as a unique sequence
-   */
-  private fun List<Sentence>.getOffsetTokens(): List<Token> {
-
-    var offset = 0
-
-    return this.flatMap {
-
-      val curOffset: Int = offset - it.position.start
-
-      offset += it.position.length
-
-      it.tokens.map {
-        it.copy(position = it.position.copy(start = it.position.start + curOffset, end = it.position.end + curOffset))
-      }
+      it.copy(
+        position = it.position.copy(start = it.position.start + curOffset, end = it.position.end + curOffset),
+        tokens = it.tokens.map {
+          it.copy(position = it.position.copy(start = it.position.start + curOffset, end = it.position.end + curOffset))
+        }
+      )
     }
   }
 
