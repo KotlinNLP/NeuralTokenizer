@@ -53,16 +53,8 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
     println("Elapsed time: %s".format(timer.formatElapsedTime()))
 
     return EvaluationStats(
-      tokens = this.buildMetricStats(
-        correct = this.countSamePositionElements(outputTokens, goldTokens),
-        outputTotal = outputSentences.sumBy { it.tokens.size },
-        goldTotal = goldSentences.sumBy { it.tokens.size }
-      ),
-      sentences = this.buildMetricStats(
-        correct = this.countSamePositionElements(outputSentences, goldSentences),
-        outputTotal = outputSentences.size,
-        goldTotal = goldSentences.size
-      )
+      tokens = this.buildMetricStats(outputElements = outputTokens, goldElements = goldTokens),
+      sentences = this.buildMetricStats(outputElements = outputSentences, goldElements = goldSentences)
     )
   }
 
@@ -157,20 +149,22 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
   }
 
   /**
-   * @param correct the number of correct elements
-   * @param outputTotal the total amount of elements found
-   * @param goldTotal the total amount of gold elements
+   * @param outputElements the list of output elements
+   * @param goldElements the list of gold elements
    *
-   * @return CoNLL statistics (precision, recall and F1 score) for a single metric
+   * @return CoNLL statistics (precision, recall and F1 score) about the comparison of the output elements respect to
+   *         the gold elements
    */
-  private fun buildMetricStats(correct: Int, outputTotal: Int, goldTotal: Int): CoNLLStats {
+  private fun buildMetricStats(outputElements: List<Positionable>, goldElements: List<Positionable>): CoNLLStats {
 
-    val correctDouble: Double = correct.toDouble()
+    val correct: Double = this.countSamePositionElements(outputElements, goldElements).toDouble()
+    val outputTotal: Int = outputElements.size
+    val goldTotal: Int = goldElements.size
 
     return CoNLLStats( // skip first field (metrics)
-      precision = if (outputTotal > 0) correctDouble / outputTotal else 0.0,
-      recall = if (goldTotal > 0) correctDouble / goldTotal else 0.0,
-      f1Score = if (outputTotal > 0 && goldTotal > 0) 2 * correctDouble / (outputTotal + goldTotal) else 0.0
+      precision = if (outputTotal > 0) correct / outputTotal else 0.0,
+      recall = if (goldTotal > 0) correct / goldTotal else 0.0,
+      f1Score = if (outputTotal > 0 && goldTotal > 0) 2 * correct / (outputTotal + goldTotal) else 0.0
     )
   }
 }
