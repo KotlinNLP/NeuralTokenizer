@@ -117,7 +117,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
 
       val lastTokenIndex: Int = this@NeuralTokenizer.getLastTokenEndIndex()
 
-      startIndex = lastTokenIndex + this@NeuralTokenizer.curTokenBuffer.length + 1
+      startIndex = lastTokenIndex + this.skippedSpacingChars + this@NeuralTokenizer.curTokenBuffer.length + 1
     }
   }
 
@@ -158,11 +158,11 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
   }
 
   /**
-   * Shift buffers to left basing on the current prediction.
-   * If new sentences are added, buffers are shifted removing all the completed sentences.
-   * If only tokens are added, buffers are shifted removing the first N tokens until the one that crosses the middle of
-   * the segment.
-   * If neither sentences or tokens are added, buffers are shifted of an amount of chars equal to half of the max
+   * Shift buffers to left based on the current prediction.
+   * If new sentences are been added, buffers are shifted removing all the completed sentences.
+   * If only tokens are been added, buffers are shifted removing the first N tokens until the one that crosses the
+   * middle of the segment.
+   * If neither sentences or tokens are added, buffers are shifted of a number of chars equal to half of the max
    * segment size (defined in the model).
    *
    * @param prevSentencesCount the number of completed sentences before processing the current segment
@@ -198,7 +198,8 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
   }
 
   /**
-   * Shift buffers of an amount equal to the first completed tokens until the one in the middle of the current segment.
+   * Shift the sentence buffer of an amount equal to the first completed tokens until the one in the middle of the
+   * current segment.
    *
    * @param sentencePrevTokensCount the number of completed tokens of the current sentence before processing the current
    *                                segment
@@ -207,12 +208,14 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
 
     val curSegmentTokens = this.curSentenceTokens.subList(sentencePrevTokensCount, this.curSentenceTokens.size)
     val tokensIterator = curSegmentTokens.iterator()
+    var lastTokenEnd = 0
     var tokensCharsCount = 0
     var curSegmentTokensToKeep = 0
 
     while (tokensIterator.hasNext() && tokensCharsCount < this.model.maxSegmentSize / 2) {
       val token: Token = tokensIterator.next()
-      tokensCharsCount += token.form.length
+      tokensCharsCount += token.position.end - lastTokenEnd + 1
+      lastTokenEnd = token.position.end
       curSegmentTokensToKeep++
     }
 
@@ -380,7 +383,6 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
       position = Position(index = index, start = start, end = end)
     ))
 
-    this.skippedSpacingChars = 0
     this.resetCurTokenBuffer()
   }
 
@@ -428,6 +430,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    */
   private fun resetCurTokenBuffer() {
     this.curTokenBuffer.setLength(0)
+    this.skippedSpacingChars = 0
   }
 
   /**
