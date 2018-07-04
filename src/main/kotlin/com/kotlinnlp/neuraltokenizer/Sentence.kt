@@ -37,17 +37,17 @@ data class Sentence(
   val text: String by lazy {
 
     val text = StringBuffer()
-    var lastTokenEnd = this.position.start
+    var tokenShouldStart = this.position.start
 
     this.tokens.forEach {
 
-      text.append(TOKENS_SEPARATOR.repeat(it.position.start - lastTokenEnd)) // multi-spaces start token padding
+      text.append(TOKENS_SEPARATOR.repeat(it.position.start - tokenShouldStart)) // multi-spaces start token padding
       text.append(it.form)
 
-      lastTokenEnd = it.position.end
+      tokenShouldStart = it.position.end + 1
     }
 
-    text.append(TOKENS_SEPARATOR.repeat(this.position.end - lastTokenEnd)) // multi-spaces end sentence padding
+    text.append(TOKENS_SEPARATOR.repeat(this.position.end - tokenShouldStart + 1)) // multi-spaces end sentence padding
 
     text.toString()
   }
