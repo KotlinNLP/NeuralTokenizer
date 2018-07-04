@@ -41,12 +41,14 @@ data class Sentence(
 
     this.tokens.forEach {
 
-      text.append(TOKENS_SEPARATOR.repeat(it.position.start - lastTokenEnd)) // multi-spaces separator
+      text.append(TOKENS_SEPARATOR.repeat(it.position.start - lastTokenEnd)) // multi-spaces start token padding
       text.append(it.form)
 
       lastTokenEnd = it.position.end
     }
 
-   text.toString()
+    text.append(TOKENS_SEPARATOR.repeat(this.position.end - lastTokenEnd)) // multi-spaces end sentence padding
+
+    text.toString()
   }
 }
