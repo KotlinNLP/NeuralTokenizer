@@ -208,13 +208,13 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
 
     val curSegmentTokens = this.curSentenceTokens.subList(sentencePrevTokensCount, this.curSentenceTokens.size)
     val tokensIterator = curSegmentTokens.iterator()
-    var lastTokenEnd = 0
+    var lastTokenEnd = curSegmentTokens.first().position.start - 1
     var tokensCharsCount = 0
     var curSegmentTokensToKeep = 0
 
     while (tokensIterator.hasNext() && tokensCharsCount < this.model.maxSegmentSize / 2) {
       val token: Token = tokensIterator.next()
-      tokensCharsCount += token.position.end - lastTokenEnd + 1
+      tokensCharsCount += token.position.end - lastTokenEnd
       lastTokenEnd = token.position.end
       curSegmentTokensToKeep++
     }
@@ -396,7 +396,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
 
     if (this.curSentenceTokens.size == 0) {
       index = 0
-      start = if (this.sentences.size > 0) (this.sentences.last().position.end + 1) else 0
+      start = this.getFirstTokenStart()
 
     } else {
       val lastToken: Token = this.curSentenceTokens.last()
@@ -406,6 +406,12 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
 
     return Pair(index, start)
   }
+
+  /**
+   * @return the start index of the first token of the current sentence
+   */
+  private fun getFirstTokenStart(): Int =
+    this.skippedSpacingChars + if (this.sentences.isNotEmpty()) (this.sentences.last().position.end + 1) else 0
 
   /**
    * Add a new [Sentence] to [sentences].
