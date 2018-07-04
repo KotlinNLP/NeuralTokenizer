@@ -55,6 +55,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
 
   /**
    * The number of spacing chars skipped after the last token added.
+   * It is used to calculate correctly the start char index of the currently buffered token.
    */
   private var skippedSpacingChars = 0
 
@@ -336,8 +337,6 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
           this.addSentence(endAt = charIndex)
         }
       }
-
-      this.skippedSpacingChars = 0
     }
   }
 
@@ -373,6 +372,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
       position = Position(index = index, start = start, end = end)
     ))
 
+    this.skippedSpacingChars = 0
     this.resetCurTokenBuffer()
   }
 
