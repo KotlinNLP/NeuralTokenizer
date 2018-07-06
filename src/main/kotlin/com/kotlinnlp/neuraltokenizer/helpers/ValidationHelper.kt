@@ -114,7 +114,7 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
 
     return this.map {
 
-      val curOffset: Int = offset - it.position.start
+      val curOffset: Int = offset - it.position.start // make the current sentence starting always from 0
 
       offset += it.position.length
 
