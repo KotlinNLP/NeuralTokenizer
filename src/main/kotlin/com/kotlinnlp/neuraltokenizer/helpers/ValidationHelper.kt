@@ -107,7 +107,7 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
         if (!isSpace)
           tokens.add(Token(
             form = text.substring(start, i + 1),
-            position = Position(index = tokens.size, start = sentenceStart + start, end = i)
+            position = Position(index = tokens.size, start = sentenceStart + start, end = sentenceStart + i)
           ))
 
         start = i + 1
