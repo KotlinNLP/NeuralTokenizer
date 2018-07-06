@@ -89,11 +89,13 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
 
       if (charClass != 2) { // end of token or end of sentence
 
-        val word: String = sentence.substring(startIndex, i + 1)
-        val isSpace: Boolean = word.length == 1 && word[0].isWhitespace()
+        val isSpace: Boolean = startIndex == i && sentence[i].isWhitespace()
 
         if (!isSpace)
-          tokens.add(Token(form = word, position = Position(index = tokens.size, start = startIndex, end = i)))
+          tokens.add(Token(
+            form = sentence.substring(startIndex, i + 1),
+            position = Position(index = tokens.size, start = startIndex, end = i)
+          ))
 
         startIndex = i + 1
       }
