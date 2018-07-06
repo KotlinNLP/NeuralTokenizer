@@ -46,7 +46,7 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
 
     val timer = Timer()
     val outputSentences: List<Sentence> = this.tokenizer.tokenize(text = mergeDataset(testSet).first).fixOffset()
-    val goldSentences: List<Sentence> = this.buildDatasetSentences(testSet).fixOffset()
+    val goldSentences: List<Sentence> = this.buildDatasetSentences(testSet)
     val outputTokens: List<Token> = outputSentences.flatMap { it.tokens }
     val goldTokens: List<Token> = goldSentences.flatMap { it.tokens }
 
@@ -65,22 +65,31 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
    *
    * @return a list of [Sentence]s
    */
-  private fun buildDatasetSentences(dataset: Dataset): List<Sentence> =
-    dataset.mapIndexed { i, (sentence, charsClassification) ->
-      Sentence(
-        position = Position(index = i, start = 0, end = sentence.lastIndex),
-        tokens = this.buildDatasetTokens(sentence = sentence, charsClassification = charsClassification)
+  private fun buildDatasetSentences(dataset: Dataset): List<Sentence> {
+
+    var start = 0
+
+    return dataset.mapIndexed { i, (text, charsClassification) ->
+
+      val sentence = Sentence(
+        position = Position(index = i, start = start, end = start + text.lastIndex),
+        tokens = this.buildDatasetTokens(text = text, charsClassification = charsClassification)
       )
+
+      start = sentence.position.end + 1
+
+      sentence
     }
+  }
 
   /**
-   * Build a tokens list from the given [sentence] string and its [charsClassification].
+   * Build a tokens list from the given [text] string and its [charsClassification].
    *
-   * @param sentence a sentence string of the dataset
+   * @param text a sentence of the dataset
    *
    * @return a list of [Token]s
    */
-  private fun buildDatasetTokens(sentence: String, charsClassification: CharsClassification): ArrayList<Token> {
+  private fun buildDatasetTokens(text: String, charsClassification: CharsClassification): ArrayList<Token> {
 
     val tokens = ArrayList<Token>()
     var start = 0
@@ -89,11 +98,11 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
 
       if (charClass != 2) { // end of token or end of sentence
 
-        val isSpace: Boolean = start == i && sentence[i].isWhitespace()
+        val isSpace: Boolean = start == i && text[i].isWhitespace()
 
         if (!isSpace)
           tokens.add(Token(
-            form = sentence.substring(start, i + 1),
+            form = text.substring(start, i + 1),
             position = Position(index = tokens.size, start = start, end = i)
           ))
 
