@@ -59,7 +59,7 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
   }
 
   /**
-   * Build a sentences list from the given [dataset].
+   * Build a sentences list from the given [dataset], like they compose a unique global text.
    *
    * @param dataset a dataset for the [tokenizer]
    *
@@ -83,7 +83,7 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
   }
 
   /**
-   * Build a tokens list from the given [text] string and its [charsClassification].
+   * Build the tokens list of a sentence given the [text] and its [charsClassification].
    *
    * @param text the text of a sentence of the dataset
    * @param charsClassification the chars classification of the sentence
