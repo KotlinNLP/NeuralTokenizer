@@ -83,21 +83,21 @@ class ValidationHelper(val tokenizer: NeuralTokenizer) {
   private fun buildDatasetTokens(sentence: String, charsClassification: CharsClassification): ArrayList<Token> {
 
     val tokens = ArrayList<Token>()
-    var startIndex = 0
+    var start = 0
 
     charsClassification.forEachIndexed { i, charClass ->
 
       if (charClass != 2) { // end of token or end of sentence
 
-        val isSpace: Boolean = startIndex == i && sentence[i].isWhitespace()
+        val isSpace: Boolean = start == i && sentence[i].isWhitespace()
 
         if (!isSpace)
           tokens.add(Token(
-            form = sentence.substring(startIndex, i + 1),
-            position = Position(index = tokens.size, start = startIndex, end = i)
+            form = sentence.substring(start, i + 1),
+            position = Position(index = tokens.size, start = start, end = i)
           ))
 
-        startIndex = i + 1
+        start = i + 1
       }
     }
 
