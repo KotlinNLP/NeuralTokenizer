@@ -60,7 +60,7 @@
         <spek.version>1.1.5</spek.version>
         <dokka.version>0.9.17</dokka.version>
         <klaxon.version>3.0.5</klaxon.version>
-        <simplednn.version>0.9.2</simplednn.version>
+        <simplednn.version>0.10.0</simplednn.version>
         <linguisticdescription.version>0.8.0</linguisticdescription.version>
         <utils.version>2.1.0</utils.version>
     </properties>
