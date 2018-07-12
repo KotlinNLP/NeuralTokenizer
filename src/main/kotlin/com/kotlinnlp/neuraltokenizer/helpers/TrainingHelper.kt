@@ -252,9 +252,7 @@ class TrainingHelper(
       segmentClassification = segmentClassification,
       goldSegmentClassification = this.segmentGoldClassification)
 
-    this.tokenizer.charsEncoder.backward(
-      outputErrorsSequence = this.tokenizer.boundariesClassifier.getInputErrors(copy = false),
-      propagateToInput = true)
+    this.tokenizer.charsEncoder.backward(this.tokenizer.boundariesClassifier.getInputErrors(copy = false))
   }
 
   /**
@@ -277,8 +275,7 @@ class TrainingHelper(
 
           charClassification
         }
-      ),
-      propagateToInput = true
+      )
     )
   }
 

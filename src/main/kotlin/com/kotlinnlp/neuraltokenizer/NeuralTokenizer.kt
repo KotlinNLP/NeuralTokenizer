@@ -26,12 +26,18 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
   /**
    * The [BiRNNEncoder] used to encode the characters of a segment.
    */
-  val charsEncoder = BiRNNEncoder<DenseNDArray>(this.model.biRNN)
+  val charsEncoder = BiRNNEncoder<DenseNDArray>(
+    network = this.model.biRNN,
+    useDropout = false, // TODO: enable during training
+    propagateToInput = true)
 
   /**
    * The processor of the boundariesNetworkModel.
    */
-  val boundariesClassifier = BatchFeedforwardProcessor<DenseNDArray>(this.model.boundariesNetworkModel)
+  val boundariesClassifier = BatchFeedforwardProcessor<DenseNDArray>(
+    neuralNetwork = this.model.boundariesNetworkModel,
+    useDropout = false, // TODO: enable during training
+    propagateToInput = true)
 
   /**
    * A Boolean indicating if the language uses the "scriptio continua" style (writing without spaces).
@@ -87,7 +93,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    */
   fun classifyChars(text: String, start: Int, length: Int): List<DenseNDArray> =
     this.boundariesClassifier.forward(
-      this.charsEncoder.encode(sequence = this.charsToEmbeddings(text = text, start = start, length = length)))
+      this.charsEncoder.forward(this.charsToEmbeddings(text = text, start = start, length = length)))
 
   /**
    * Initialize variables used during the tokenization.

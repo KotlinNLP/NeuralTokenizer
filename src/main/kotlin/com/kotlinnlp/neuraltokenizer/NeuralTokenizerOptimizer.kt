@@ -96,7 +96,7 @@ class NeuralTokenizerOptimizer(
     this.charsEncoderOptimizer.accumulate(this.tokenizer.charsEncoder.getParamsErrors(copy = false))
     this.boundariesClassifierOptimizer.accumulate(this.tokenizer.boundariesClassifier.getParamsErrors(copy = false))
 
-    this.tokenizer.charsEncoder.getInputSequenceErrors(copy = false).forEachIndexed { i, errors ->
+    this.tokenizer.charsEncoder.getInputErrors(copy = false).forEachIndexed { i, errors ->
       this.embeddingsOptimizer.accumulate(
         embeddingKey = segment[i],
         errors = errors.getRange(0, errors.length - this.tokenizer.model.addingFeaturesSize)
