@@ -19,36 +19,4 @@ import com.kotlinnlp.linguisticdescription.sentence.token.properties.Position
 data class Sentence(
   override val tokens: List<Token>,
   override val position: Position
-) : RealSentence<Token> {
-
-  companion object {
-
-    /**
-     * A separator used to construct the text of the sentence.
-     * One or more separators are put between tokens when there is a gap between the end of a token and the start of
-     * the following one.
-     */
-    private const val TOKENS_SEPARATOR = " "
-  }
-
-  /**
-   * The text of this sentence
-   */
-  val text: String by lazy {
-
-    val text = StringBuffer()
-    var tokenShouldStart = this.position.start
-
-    this.tokens.forEach {
-
-      text.append(TOKENS_SEPARATOR.repeat(it.position.start - tokenShouldStart)) // multi-spaces start token padding
-      text.append(it.form)
-
-      tokenShouldStart = it.position.end + 1
-    }
-
-    text.append(TOKENS_SEPARATOR.repeat(this.position.end - tokenShouldStart + 1)) // multi-spaces end sentence padding
-
-    text.toString()
-  }
-}
+) : RealSentence<Token>
