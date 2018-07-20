@@ -15,6 +15,7 @@
         <assembly-plugin.version>2.6</assembly-plugin.version>
         <kotlin.version>1.2.41</kotlin.version>
         <neuraltokenizer.version>0.3.0</neuraltokenizer.version>
+        <simplednn.version>0.11.0</simplednn.version>
     </properties>
 
     <repositories>
@@ -115,6 +116,12 @@
             <groupId>com.kotlinnlp</groupId>
             <artifactId>neuraltokenizer</artifactId>
             <version>${neuraltokenizer.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.kotlinnlp</groupId>
+            <artifactId>simplednn</artifactId>
+            <version>${simplednn.version}</version>
         </dependency>
     </dependencies>
 </project>
