@@ -23,7 +23,7 @@ import java.io.FileOutputStream
  */
 class TrainingHelper(
   val tokenizer: NeuralTokenizer,
-  val optimizer: NeuralTokenizerOptimizer = NeuralTokenizerOptimizer(tokenizer)
+  val optimizer: NeuralTokenizerOptimizer = NeuralTokenizerOptimizer(tokenizer.model)
 ) {
 
   /**
@@ -34,7 +34,7 @@ class TrainingHelper(
   /**
    * The [ValidationHelper] used to validate each epoch when a not null validation dataset is passed.
    */
-  private val validationHelper = ValidationHelper(this.tokenizer)
+  private val validationHelper = ValidationHelper(this.tokenizer.model)
 
   /**
    * The best accuracy reached during the training.
@@ -229,7 +229,25 @@ class TrainingHelper(
 
     this.backward(segmentClassification = this.tokenizer.classifyChars(text = text, start = start, length = length))
 
-    this.optimizer.accumulateErrors(segment = text.subSequence(start, start + length))
+    this.accumulateErrors(segment = text.subSequence(start, start + length))
+  }
+
+  /**
+   * Accumulate the parameters errors into the optimizer.
+   *
+   * @param segment the segment used for the last backward
+   */
+  private fun accumulateErrors(segment: CharSequence) {
+
+    this.optimizer.charsEncoderOptimizer.accumulate(this.tokenizer.charsEncoder.getParamsErrors(copy = false))
+    this.optimizer.boundariesClassifierOptimizer.accumulate(this.tokenizer.boundariesClassifier.getParamsErrors(copy = false))
+
+    this.tokenizer.charsEncoder.getInputErrors(copy = false).forEachIndexed { i, errors ->
+      this.optimizer.embeddingsOptimizer.accumulate(
+        embeddingKey = segment[i],
+        errors = errors.getRange(0, errors.length - this.tokenizer.model.addingFeaturesSize)
+      )
+    }
   }
 
   /**

@@ -32,21 +32,21 @@ class NeuralTokenizerOptimizer(
   /**
    * The Optimizer of the BiRNN model of the charsEncoder.
    */
-  private val charsEncoderOptimizer = ParamsOptimizer(
+  val charsEncoderOptimizer = ParamsOptimizer(
     params = this.model.biRNN.model,
     updateMethod = charsEncoderUpdateMethod)
 
   /**
    * The Optimizer of the model boundariesClassifier.
    */
-  private val boundariesClassifierOptimizer = ParamsOptimizer(
+  val boundariesClassifierOptimizer = ParamsOptimizer(
     params = this.model.boundariesNetworkModel.model,
     updateMethod = boundariesClassifierUpdateMethod)
 
   /**
    * The Optimizer of the embeddings vectors.
    */
-  private val embeddingsOptimizer = EmbeddingsOptimizer(
+  val embeddingsOptimizer = EmbeddingsOptimizer(
     embeddingsMap = this.model.embeddings,
     updateMethod = embeddingsUpdateMethod)
 
@@ -84,23 +84,5 @@ class NeuralTokenizerOptimizer(
     this.charsEncoderOptimizer.newExample()
     this.boundariesClassifierOptimizer.newExample()
     this.embeddingsOptimizer.newExample()
-  }
-
-  /**
-   * Accumulate the parameters errors into the optimizer.
-   *
-   * @param segment the segment used for the last backward
-   */
-  fun accumulateErrors(segment: CharSequence) {
-
-    this.charsEncoderOptimizer.accumulate(this.tokenizer.charsEncoder.getParamsErrors(copy = false))
-    this.boundariesClassifierOptimizer.accumulate(this.tokenizer.boundariesClassifier.getParamsErrors(copy = false))
-
-    this.tokenizer.charsEncoder.getInputErrors(copy = false).forEachIndexed { i, errors ->
-      this.embeddingsOptimizer.accumulate(
-        embeddingKey = segment[i],
-        errors = errors.getRange(0, errors.length - this.tokenizer.model.addingFeaturesSize)
-      )
-    }
   }
 }
