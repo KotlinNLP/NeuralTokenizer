@@ -17,37 +17,37 @@ import com.kotlinnlp.simplednn.core.optimizer.ScheduledUpdater
 /**
  * The Optimizer of the sub-networks of the [NeuralTokenizer].
  *
- * @property tokenizer the [NeuralTokenizer] to optimize
+ * @property model the [NeuralTokenizerModel] to optimize
  * @param charsEncoderUpdateMethod the update method for the charsEncoder (ADAM is default)
  * @param boundariesClassifierUpdateMethod the update method for the boundariesClassifier (ADAM is default)
  * @param embeddingsUpdateMethod the update method for the embeddings (AdaGrad is default)
  */
 class NeuralTokenizerOptimizer(
-  val tokenizer: NeuralTokenizer,
+  val model: NeuralTokenizerModel,
   charsEncoderUpdateMethod: UpdateMethod<*> = ADAMMethod(stepSize = 0.001),
   boundariesClassifierUpdateMethod: UpdateMethod<*> = ADAMMethod(stepSize = 0.001),
   embeddingsUpdateMethod: UpdateMethod<*> = AdaGradMethod(learningRate = 0.01)
 ) : ScheduledUpdater {
 
   /**
-   * The Optimizer of the charsEncoder of the [tokenizer].
+   * The Optimizer of the BiRNN model of the charsEncoder.
    */
   private val charsEncoderOptimizer = ParamsOptimizer(
-    params = this.tokenizer.charsEncoder.network.model,
+    params = this.model.biRNN.model,
     updateMethod = charsEncoderUpdateMethod)
 
   /**
-   * The Optimizer of the boundariesClassifier of the [tokenizer].
+   * The Optimizer of the model boundariesClassifier.
    */
   private val boundariesClassifierOptimizer = ParamsOptimizer(
-    params = this.tokenizer.boundariesClassifier.neuralNetwork.model,
+    params = this.model.boundariesNetworkModel.model,
     updateMethod = boundariesClassifierUpdateMethod)
 
   /**
-   * The Optimizer of the embeddings vectors of the [tokenizer].
+   * The Optimizer of the embeddings vectors.
    */
   private val embeddingsOptimizer = EmbeddingsOptimizer(
-    embeddingsMap = this.tokenizer.model.embeddings,
+    embeddingsMap = this.model.embeddings,
     updateMethod = embeddingsUpdateMethod)
 
   /**
