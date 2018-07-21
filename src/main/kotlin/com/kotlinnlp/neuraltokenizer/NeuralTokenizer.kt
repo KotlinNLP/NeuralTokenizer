@@ -20,15 +20,18 @@ import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArrayFactory
  * Neural Tokenizer.
  *
  * @property model the model for the sub-networks of this [NeuralTokenizer]
+ * @param useDropout whether to apply the dropout during the forward
  */
-class NeuralTokenizer(val model: NeuralTokenizerModel) {
+class NeuralTokenizer(
+  val model: NeuralTokenizerModel,
+  useDropout: Boolean) {
 
   /**
    * The [BiRNNEncoder] used to encode the characters of a segment.
    */
   val charsEncoder = BiRNNEncoder<DenseNDArray>(
     network = this.model.biRNN,
-    useDropout = false, // TODO: enable during training
+    useDropout = useDropout,
     propagateToInput = true)
 
   /**
@@ -36,7 +39,7 @@ class NeuralTokenizer(val model: NeuralTokenizerModel) {
    */
   val boundariesClassifier = BatchFeedforwardProcessor<DenseNDArray>(
     neuralNetwork = this.model.boundariesNetworkModel,
-    useDropout = false, // TODO: enable during training
+    useDropout = useDropout,
     propagateToInput = true)
 
   /**
