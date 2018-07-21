@@ -23,23 +23,22 @@ import com.kotlinnlp.simplednn.dataset.Shuffler
  */
 fun main(args: Array<String>) {
 
-  val tokenizer = NeuralTokenizer(
-    model = NeuralTokenizerModel(
-      language = args[0],
-      maxSegmentSize = 50,
-      charEmbeddingsSize = 30,
-      hiddenSize = 60,
-      hiddenConnectionType = LayerType.Connection.GRU))
+  val model = NeuralTokenizerModel(
+    language = args[0],
+    maxSegmentSize = 50,
+    charEmbeddingsSize = 30,
+    hiddenSize = 60,
+    hiddenConnectionType = LayerType.Connection.GRU)
 
   val helper = TrainingHelper(
-    tokenizer = tokenizer,
+    tokenizer = NeuralTokenizer(model = model, useDropout = true),
     optimizer = NeuralTokenizerOptimizer(
-      tokenizer = tokenizer,
+      model = model,
       charsEncoderUpdateMethod = ADAMMethod(stepSize = 0.001),
       boundariesClassifierUpdateMethod = ADAMMethod(stepSize = 0.0001),
       embeddingsUpdateMethod = ADAMMethod(stepSize = 0.001)))
 
-  printModel(tokenizer)
+  printModel(model)
   println()
 
   helper.train(
@@ -52,12 +51,12 @@ fun main(args: Array<String>) {
 }
 
 /**
- * Print the configuration parameters of the [tokenizer] model.
+ * Print the configuration parameters of the tokenizer model.
  *
- * @param tokenizer a [NeuralTokenizer]
+ * @param model a [NeuralTokenizerModel]
  */
-private fun printModel(tokenizer: NeuralTokenizer) {
+private fun printModel(model: NeuralTokenizerModel) {
 
   println("-- MODEL\n")
-  println(tokenizer.model)
+  println(model)
 }
