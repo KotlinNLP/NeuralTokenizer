@@ -15,8 +15,15 @@ import com.kotlinnlp.utils.Timer
 
 /**
  * A helper for the validation of a [NeuralTokenizer].
+ *
+ * @param model the model
  */
-class ValidationHelper(val tokenizer: NeuralTokenizer) {
+class ValidationHelper(model: NeuralTokenizerModel) {
+
+  /**
+   * The tokenizer.
+   */
+  private val tokenizer = NeuralTokenizer(model = model, useDropout = false)
 
   /**
    * Statistics given by the CoNLL evaluation script.
