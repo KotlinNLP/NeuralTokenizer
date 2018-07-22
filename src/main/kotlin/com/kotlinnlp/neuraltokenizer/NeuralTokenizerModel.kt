@@ -22,8 +22,8 @@ import java.io.Serializable
 /**
  * The serializable model of a [NeuralTokenizer].
  *
- * @property language the language within the [NeuralTokenizer] works. If it matches a managed iso-code, special
- *                    resources will be used for the given language. (Default = unknown)
+ * @property language the ISO 639-1 code of the language within the [NeuralTokenizer] works. If it matches a managed
+ *                    language, special resources will be used for the given language. (Default = unknown)
  * @property maxSegmentSize the max size of the segment of text used as buffer
  * @param charEmbeddingsSize the size of each embeddings associated to each character (default = 30)
  * @param hiddenSize the size of the hidden arrays (the output of each RNN of the [BiRNN]) (default = 50)
