@@ -20,11 +20,12 @@ import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArrayFactory
  * Neural Tokenizer.
  *
  * @property model the model for the sub-networks of this [NeuralTokenizer]
- * @param useDropout whether to apply the dropout during the forward
+ * @param useDropout whether to apply the dropout during the forward (default = false)
  */
 class NeuralTokenizer(
   val model: NeuralTokenizerModel,
-  useDropout: Boolean) {
+  useDropout: Boolean = false
+) {
 
   /**
    * The [BiRNNEncoder] used to encode the characters of a segment.
