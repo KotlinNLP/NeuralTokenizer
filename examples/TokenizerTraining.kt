@@ -25,7 +25,7 @@ import com.kotlinnlp.simplednn.dataset.Shuffler
 fun main(args: Array<String>) {
 
   val model = NeuralTokenizerModel(
-    language = getLanguageByIso(args[0].toLowerCase()) ?: throw RuntimeException("Invalid language code: ${args[0]}"),
+    language = getLanguageByIso(args[0].toLowerCase()),
     maxSegmentSize = 50,
     charEmbeddingsSize = 30,
     hiddenSize = 60,
