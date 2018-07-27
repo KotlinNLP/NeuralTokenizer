@@ -7,7 +7,7 @@
 
 package com.kotlinnlp.neuraltokenizer
 
-import com.kotlinnlp.linguisticdescription.Language
+import com.kotlinnlp.linguisticdescription.language.Language
 import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMap
 import com.kotlinnlp.simplednn.core.functionalities.activations.Softmax
 import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh

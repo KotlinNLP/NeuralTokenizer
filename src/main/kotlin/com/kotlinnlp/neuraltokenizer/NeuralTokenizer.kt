@@ -7,7 +7,7 @@
 
 package com.kotlinnlp.neuraltokenizer
 
-import com.kotlinnlp.linguisticdescription.Language
+import com.kotlinnlp.linguisticdescription.language.Language
 import com.kotlinnlp.linguisticdescription.sentence.token.properties.Position
 import com.kotlinnlp.neuraltokenizer.utils.AbbreviationsContainer
 import com.kotlinnlp.neuraltokenizer.utils.abbreviations
