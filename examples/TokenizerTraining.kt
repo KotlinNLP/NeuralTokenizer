@@ -5,6 +5,7 @@
  * file, you can obtain one at http://mozilla.org/MPL/2.0/.
  * ------------------------------------------------------------------*/
 
+import com.kotlinnlp.linguisticdescription.Language
 import com.kotlinnlp.neuraltokenizer.*
 import com.kotlinnlp.neuraltokenizer.helpers.TrainingHelper
 import com.kotlinnlp.neuraltokenizer.utils.readDataset
@@ -16,15 +17,17 @@ import com.kotlinnlp.simplednn.dataset.Shuffler
  * Execute the training of a [NeuralTokenizer].
  *
  * Command line arguments:
- *   1. The language iso-code ("--" for no language).
+ *   1. The language iso-code ("--" for unknown language).
  *   2. The name of the file in which to save the model.
  *   3. The filename of the training dataset.
  *   4. The filename of the validation set (optional -> if present, the tokenizer is validated on it after each epoch).
  */
 fun main(args: Array<String>) {
 
+  val languagesByIso: Map<String, Language> = Language.values().associateBy { it.isoCode }
+
   val model = NeuralTokenizerModel(
-    language = args[0],
+    language = languagesByIso[args[0].toLowerCase()] ?: throw RuntimeException("Invalid language code: ${args[0]}"),
     maxSegmentSize = 50,
     charEmbeddingsSize = 30,
     hiddenSize = 60,

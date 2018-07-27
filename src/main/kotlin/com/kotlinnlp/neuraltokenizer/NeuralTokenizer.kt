@@ -7,6 +7,7 @@
 
 package com.kotlinnlp.neuraltokenizer
 
+import com.kotlinnlp.linguisticdescription.Language
 import com.kotlinnlp.linguisticdescription.sentence.token.properties.Position
 import com.kotlinnlp.neuraltokenizer.utils.AbbreviationsContainer
 import com.kotlinnlp.neuraltokenizer.utils.abbreviations
@@ -46,7 +47,10 @@ class NeuralTokenizer(
   /**
    * A Boolean indicating if the language uses the "scriptio continua" style (writing without spaces).
    */
-  private val useScriptioContinua: Boolean = this.model.language in setOf("zh", "ja", "th")
+  private val useScriptioContinua: Boolean = this.model.language in setOf(
+    Language.Chinese,
+    Language.Japanese,
+    Language.Thai)
 
   /**
    * The sentences resulting from the tokenization of a text.
@@ -310,9 +314,11 @@ class NeuralTokenizer(
    */
   private fun String.isEndOfAbbreviation(focusIndex: Int): Boolean {
 
-    if (this[focusIndex] == '.' && focusIndex > 0 && this@NeuralTokenizer.model.language in abbreviations) {
+    val langCode: String = this@NeuralTokenizer.model.language.isoCode
 
-      val langAbbreviations: AbbreviationsContainer = abbreviations[this@NeuralTokenizer.model.language]!!
+    if (this[focusIndex] == '.' && focusIndex > 0 && langCode in abbreviations) {
+
+      val langAbbreviations: AbbreviationsContainer = abbreviations[langCode]!!
 
       val firstUsefulCharIndex: Int = focusIndex - minOf(focusIndex, langAbbreviations.maxLength - 1)
       var cadidateStart = focusIndex - 1 // the start index of the candidate abbreviation

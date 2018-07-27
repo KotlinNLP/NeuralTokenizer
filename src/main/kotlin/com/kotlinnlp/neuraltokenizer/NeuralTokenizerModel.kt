@@ -7,6 +7,7 @@
 
 package com.kotlinnlp.neuraltokenizer
 
+import com.kotlinnlp.linguisticdescription.Language
 import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsMap
 import com.kotlinnlp.simplednn.core.functionalities.activations.Softmax
 import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh
@@ -22,15 +23,15 @@ import java.io.Serializable
 /**
  * The serializable model of a [NeuralTokenizer].
  *
- * @property language the ISO 639-1 code of the language within the [NeuralTokenizer] works. If it matches a managed
- *                    language, special resources will be used for the given language. (Default = unknown)
+ * @property language the language within the [NeuralTokenizer] works. If it matches a managed language, special
+ *                    resources will be used for the given language. (Default = unknown)
  * @property maxSegmentSize the max size of the segment of text used as buffer
  * @param charEmbeddingsSize the size of each embeddings associated to each character (default = 30)
  * @param hiddenSize the size of the hidden arrays (the output of each RNN of the [BiRNN]) (default = 50)
  * @param hiddenConnectionType the recurrent connection type of the [BiRNN] (default = RAN)
  */
 class NeuralTokenizerModel(
-  val language: String = "--",
+  val language: Language = Language.Unknown,
   val maxSegmentSize: Int = 50,
   charEmbeddingsSize: Int = 30,
   hiddenSize: Int = 100,
@@ -92,14 +93,6 @@ class NeuralTokenizerModel(
    * The embeddings mapped to each character.
    */
   val embeddings = EmbeddingsMap<Char>(size = charEmbeddingsSize)
-
-  /**
-   * Language iso-code check.
-   */
-  init {
-    require(this.language.length == 2) { "The language iso-code must be 2 chars long" }
-    require(this.language == this.language.toLowerCase()) { "The language iso-code must be lower case" }
-  }
 
   /**
    * Serialize this [BiRNN] and write it to an output stream.
