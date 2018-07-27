@@ -5,7 +5,7 @@
  * file, you can obtain one at http://mozilla.org/MPL/2.0/.
  * ------------------------------------------------------------------*/
 
-import com.kotlinnlp.linguisticdescription.Language
+import com.kotlinnlp.linguisticdescription.getLanguageByIso
 import com.kotlinnlp.neuraltokenizer.*
 import com.kotlinnlp.neuraltokenizer.helpers.TrainingHelper
 import com.kotlinnlp.neuraltokenizer.utils.readDataset
@@ -24,10 +24,8 @@ import com.kotlinnlp.simplednn.dataset.Shuffler
  */
 fun main(args: Array<String>) {
 
-  val languagesByIso: Map<String, Language> = Language.values().associateBy { it.isoCode }
-
   val model = NeuralTokenizerModel(
-    language = languagesByIso[args[0].toLowerCase()] ?: throw RuntimeException("Invalid language code: ${args[0]}"),
+    language = getLanguageByIso(args[0].toLowerCase()) ?: throw RuntimeException("Invalid language code: ${args[0]}"),
     maxSegmentSize = 50,
     charEmbeddingsSize = 30,
     hiddenSize = 60,
