@@ -20,17 +20,17 @@ import java.io.FileInputStream
  */
 fun main(args: Array<String>) {
 
-  println("Loading model from '${args[1]}'...")
-  val model = NeuralTokenizerModel.load(FileInputStream(File(args[1])))
+  println("Loading model from '${args[0]}'...")
+  val model = NeuralTokenizerModel.load(FileInputStream(File(args[0])))
 
-  println("Reading dataset from '${args[2]}'...")
-  val testSet = readDataset(args[2])
+  println("Reading dataset from '${args[1]}'...")
+  val testSet = readDataset(args[1])
 
   println("\n--MODEL")
   println(model)
 
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(testSet.size))
-  println("Language: ${args[0]}")
+  println("Language: ${model.language}")
 
   val helper = ValidationHelper(model)
   val stats: ValidationHelper.EvaluationStats = helper.validate(testSet)
