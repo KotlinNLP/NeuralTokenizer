@@ -16,7 +16,7 @@
         <kotlin.version>1.2.41</kotlin.version>
         <neuraltokenizer.version>0.4.2</neuraltokenizer.version>
         <linguisticdescription.version>0.10.0</linguisticdescription.version>
-        <simplednn.version>0.11.0</simplednn.version>
+        <simplednn.version>0.11.1</simplednn.version>
     </properties>
 
     <repositories>
