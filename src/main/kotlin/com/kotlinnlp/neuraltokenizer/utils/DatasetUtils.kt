@@ -9,8 +9,8 @@ package com.kotlinnlp.neuraltokenizer.utils
 
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.Parser
-import com.kotlinnlp.simplednn.dataset.Shuffler
-import com.kotlinnlp.simplednn.helpers.training.utils.ExamplesIndices
+import com.kotlinnlp.utils.ExamplesIndices
+import com.kotlinnlp.utils.Shuffler
 
 typealias CharsClassification = List<Int>
 typealias AnnotatedSentence = Pair<String, CharsClassification>
