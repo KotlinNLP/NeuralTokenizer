@@ -11,7 +11,7 @@ import com.kotlinnlp.neuraltokenizer.helpers.TrainingHelper
 import com.kotlinnlp.neuraltokenizer.utils.readDataset
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
 import com.kotlinnlp.simplednn.core.layers.LayerType
-import com.kotlinnlp.simplednn.dataset.Shuffler
+import com.kotlinnlp.utils.Shuffler
 
 /**
  * Execute the training of a [NeuralTokenizer].
