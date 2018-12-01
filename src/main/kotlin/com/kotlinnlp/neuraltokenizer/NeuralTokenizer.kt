@@ -184,13 +184,16 @@ class NeuralTokenizer(
    */
   private fun shiftBuffer(prevSentencesCount: Int, sentencePrevTokensCount: Int) {
 
+    val segmentStartsWithSpaces: Boolean =
+      this.skippedSpacingChars > 0 && this.curTokenBuffer.length < this.model.maxSegmentSize
+
     when {
       this.sentences.size > prevSentencesCount -> // New sentences added
         this.shiftBufferBySentences()
       this.curSentenceTokens.size > sentencePrevTokensCount -> // New tokens added
         this.shiftBufferByTokens(sentencePrevTokensCount = sentencePrevTokensCount)
-      this.skippedSpacingChars > 0 -> // No boundaries found -> shift preceding spacing chars
-        this.curTokenBuffer.setLength(0) // reset the cur buffered token keeping the skipped spacing chars
+      segmentStartsWithSpaces -> // Shift all initial spaces
+        this.curTokenBuffer.setLength(0)
       else -> // No boundaries found
         this.shiftHalfBuffer()
     }
