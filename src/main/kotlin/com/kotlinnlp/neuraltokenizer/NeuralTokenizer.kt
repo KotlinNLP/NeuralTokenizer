@@ -184,19 +184,15 @@ class NeuralTokenizer(
    */
   private fun shiftBuffer(prevSentencesCount: Int, sentencePrevTokensCount: Int) {
 
-    if (this.sentences.size > prevSentencesCount) {
-      // New sentences added
-      this.shiftBufferBySentences()
-
-    } else {
-      if (this.curSentenceTokens.isEmpty() || this.curSentenceTokens.size == sentencePrevTokensCount) {
-        // No boundaries found
-        this.shiftHalfBuffer()
-
-      } else {
-        // New tokens added
+    when {
+      this.sentences.size > prevSentencesCount -> // New sentences added
+        this.shiftBufferBySentences()
+      this.curSentenceTokens.size > sentencePrevTokensCount -> // New tokens added
         this.shiftBufferByTokens(sentencePrevTokensCount = sentencePrevTokensCount)
-      }
+      this.skippedSpacingChars > 0 -> // No boundaries found -> shift preceding spacing chars
+        this.curTokenBuffer.setLength(0) // reset the cur buffered token keeping the skipped spacing chars
+      else -> // No boundaries found
+        this.shiftHalfBuffer()
     }
   }
 
