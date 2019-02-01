@@ -134,16 +134,16 @@ class ValidationHelper(model: NeuralTokenizerModel) {
 
     var offset = 0
 
-    return this.map {
+    return this.map { s ->
 
-      val curOffset: Int = offset - it.position.start // make the current sentence starting always from 0
+      val curOffset: Int = offset - s.position.start // make the current sentence starting always from 0
 
-      offset += it.position.length
+      offset += s.position.length
 
-      it.copy(
-        position = it.position.copy(start = it.position.start + curOffset, end = it.position.end + curOffset),
-        tokens = it.tokens.map {
-          it.copy(position = it.position.copy(start = it.position.start + curOffset, end = it.position.end + curOffset))
+      s.copy(
+        position = s.position.copy(start = s.position.start + curOffset, end = s.position.end + curOffset),
+        tokens = s.tokens.map { t ->
+          t.copy(position = t.position.copy(start = t.position.start + curOffset, end = t.position.end + curOffset))
         }
       )
     }
