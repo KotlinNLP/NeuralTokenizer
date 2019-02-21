@@ -41,7 +41,8 @@ fun main(args: Array<String>) {
       boundariesClassifierUpdateMethod = ADAMMethod(stepSize = 0.0001),
       embeddingsUpdateMethod = ADAMMethod(stepSize = 0.001)))
 
-  printModel(model)
+  println("-- MODEL\n")
+  println(model)
   println()
 
   helper.train(
@@ -51,15 +52,4 @@ fun main(args: Array<String>) {
     shuffler = Shuffler(),
     validationSet = if (args.size > 2) readDataset(args[3]) else null,
     modelFilename = args[1])
-}
-
-/**
- * Print the configuration parameters of the tokenizer model.
- *
- * @param model a [NeuralTokenizerModel]
- */
-private fun printModel(model: NeuralTokenizerModel) {
-
-  println("-- MODEL\n")
-  println(model)
 }
