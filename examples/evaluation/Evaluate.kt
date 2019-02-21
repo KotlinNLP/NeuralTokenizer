@@ -16,17 +16,21 @@ import java.io.FileInputStream
 /**
  * Execute an evaluation of a [NeuralTokenizerModel].
  *
- * Command line arguments:
- *   1. The filename of the serialized model of the tokenizer.
- *   2. The filename of the test dataset.
+ * Launch with the '-h' option for help about the command line arguments.
  */
 fun main(args: Array<String>) {
 
-  println("Loading model from '${args[0]}'...")
-  val model = NeuralTokenizerModel.load(FileInputStream(File(args[0])))
+  val parsedArgs = CommandLineArguments(args)
 
-  println("Reading dataset from '${args[1]}'...")
-  val testSet = readDataset(args[1])
+  val model = parsedArgs.modelPath.let {
+    println("Loading tokenizer model from '$it'...")
+    NeuralTokenizerModel.load(FileInputStream(File(it)))
+  }
+
+  val testSet = parsedArgs.validationSetPath.let {
+    println("Reading validation set from '$it'...")
+    readDataset(it)
+  }
 
   println("\n--MODEL")
   println(model)

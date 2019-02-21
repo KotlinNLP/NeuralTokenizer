@@ -10,6 +10,7 @@ package training
 import com.kotlinnlp.linguisticdescription.language.getLanguageByIso
 import com.kotlinnlp.neuraltokenizer.*
 import com.kotlinnlp.neuraltokenizer.helpers.TrainingHelper
+import com.kotlinnlp.neuraltokenizer.utils.Dataset
 import com.kotlinnlp.neuraltokenizer.utils.readDataset
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
 import com.kotlinnlp.simplednn.core.layers.LayerType
@@ -18,21 +19,26 @@ import com.kotlinnlp.utils.Shuffler
 /**
  * Execute the training of a [NeuralTokenizer].
  *
- * Command line arguments:
- *   1. The language iso-code ("--" for unknown language).
- *   2. The name of the file in which to save the model.
- *   3. The filename of the training dataset.
- *   4. The filename of the validation set (optional -> if present, the tokenizer is validated on it after each epoch).
+ * Launch with the '-h' option for help about the command line arguments.
  */
 fun main(args: Array<String>) {
 
+  val parsedArgs = CommandLineArguments(args)
+
+  val trainingSet: Dataset = parsedArgs.trainingSetPath.let {
+    println("Reading training set from '$it'...")
+    readDataset(it)
+  }
+  val validationSet: Dataset? = parsedArgs.validationSetPath?.let {
+    println("Reading validation set from '$it'...")
+    readDataset(it)
+  }
   val model = NeuralTokenizerModel(
-    language = getLanguageByIso(args[0].toLowerCase()),
+    language = getLanguageByIso(parsedArgs.langCode.toLowerCase()),
     maxSegmentSize = 50,
     charEmbeddingsSize = 30,
     hiddenSize = 60,
     hiddenConnectionType = LayerType.Connection.GRU)
-
   val helper = TrainingHelper(
     tokenizer = NeuralTokenizer(model = model, useDropout = true),
     optimizer = NeuralTokenizerOptimizer(
@@ -46,10 +52,10 @@ fun main(args: Array<String>) {
   println()
 
   helper.train(
-    trainingSet = readDataset(args[2]),
+    trainingSet = trainingSet,
     batchSize = 100,
-    epochs = 30,
+    epochs = parsedArgs.epochs,
     shuffler = Shuffler(),
-    validationSet = if (args.size > 2) readDataset(args[3]) else null,
-    modelFilename = args[1])
+    validationSet = validationSet,
+    modelFilename = parsedArgs.modelPath)
 }
