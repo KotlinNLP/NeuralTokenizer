@@ -66,7 +66,7 @@
                         <phase>package</phase>
                         <goals> <goal>single</goal> </goals>
                         <configuration>
-                            <finalName>tokenizer-train</finalName>
+                            <finalName>train-tokenizer</finalName>
                             <archive>
                                 <manifest>
                                     <addClasspath>true</addClasspath>
@@ -83,7 +83,7 @@
                         <phase>package</phase>
                         <goals> <goal>single</goal> </goals>
                         <configuration>
-                            <finalName>tokenizer-eval</finalName>
+                            <finalName>evaluate-tokenizer</finalName>
                             <archive>
                                 <manifest>
                                     <addClasspath>true</addClasspath>
