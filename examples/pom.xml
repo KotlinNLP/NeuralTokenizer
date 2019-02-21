@@ -70,7 +70,7 @@
                             <archive>
                                 <manifest>
                                     <addClasspath>true</addClasspath>
-                                    <mainClass>TokenizerTrainingKt</mainClass>
+                                    <mainClass>training.TrainKt</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>
@@ -87,7 +87,7 @@
                             <archive>
                                 <manifest>
                                     <addClasspath>true</addClasspath>
-                                    <mainClass>TokenizerEvalKt</mainClass>
+                                    <mainClass>evaluation.EvaluateKt</mainClass>
                                 </manifest>
                             </archive>
                             <descriptorRefs>

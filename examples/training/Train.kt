@@ -5,6 +5,8 @@
  * file, you can obtain one at http://mozilla.org/MPL/2.0/.
  * ------------------------------------------------------------------*/
 
+package training
+
 import com.kotlinnlp.linguisticdescription.language.getLanguageByIso
 import com.kotlinnlp.neuraltokenizer.*
 import com.kotlinnlp.neuraltokenizer.helpers.TrainingHelper

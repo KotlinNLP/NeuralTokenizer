@@ -5,6 +5,8 @@
  * file, you can obtain one at http://mozilla.org/MPL/2.0/.
  * ------------------------------------------------------------------*/
 
+package evaluation
+
 import com.kotlinnlp.neuraltokenizer.*
 import com.kotlinnlp.neuraltokenizer.helpers.ValidationHelper
 import com.kotlinnlp.neuraltokenizer.utils.readDataset
