@@ -14,6 +14,8 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <assembly-plugin.version>2.6</assembly-plugin.version>
         <kotlin.version>1.3.10</kotlin.version>
+        <xenocom.version>0.0.5</xenocom.version>
+        <argparser.version>2.0.7</argparser.version>
         <neuraltokenizer.version>0.4.4</neuraltokenizer.version>
         <linguisticdescription.version>0.10.1</linguisticdescription.version>
         <simplednn.version>0.12.0</simplednn.version>
@@ -111,6 +113,18 @@
             <groupId>org.jetbrains.kotlin</groupId>
             <artifactId>kotlin-reflect</artifactId>
             <version>${kotlin.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.xenomachina</groupId>
+            <artifactId>xenocom</artifactId>
+            <version>${xenocom.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>com.xenomachina</groupId>
+            <artifactId>kotlin-argparser</artifactId>
+            <version>${argparser.version}</version>
         </dependency>
 
         <dependency>
