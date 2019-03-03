@@ -40,7 +40,7 @@ class NeuralTokenizerOptimizer(
    * The Optimizer of the model boundariesClassifier.
    */
   val boundariesClassifierOptimizer = ParamsOptimizer(
-    params = this.model.boundariesNetworkModel.model,
+    params = this.model.boundariesNetworkModel,
     updateMethod = boundariesClassifierUpdateMethod)
 
   /**

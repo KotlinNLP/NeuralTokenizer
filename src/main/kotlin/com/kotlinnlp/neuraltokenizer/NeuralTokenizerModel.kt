@@ -13,7 +13,7 @@ import com.kotlinnlp.simplednn.core.functionalities.activations.Softmax
 import com.kotlinnlp.simplednn.core.functionalities.activations.Tanh
 import com.kotlinnlp.simplednn.core.layers.LayerInterface
 import com.kotlinnlp.simplednn.core.layers.LayerType
-import com.kotlinnlp.simplednn.core.neuralnetwork.NeuralNetwork
+import com.kotlinnlp.simplednn.core.layers.StackedLayersParameters
 import com.kotlinnlp.simplednn.deeplearning.birnn.BiRNN
 import com.kotlinnlp.utils.Serializer
 import java.io.InputStream
@@ -79,7 +79,7 @@ class NeuralTokenizerModel(
   /**
    * The model of the boundariesEncoder.
    */
-  val boundariesNetworkModel = NeuralNetwork(
+  val boundariesNetworkModel = StackedLayersParameters(
     LayerInterface(
       type = LayerType.Input.Dense,
       size = 2 * hiddenSize),

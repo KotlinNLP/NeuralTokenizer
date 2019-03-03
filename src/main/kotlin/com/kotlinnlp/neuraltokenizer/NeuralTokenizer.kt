@@ -40,7 +40,7 @@ class NeuralTokenizer(
    * The processor of the boundariesNetworkModel.
    */
   val boundariesClassifier = BatchFeedforwardProcessor<DenseNDArray>(
-    neuralNetwork = this.model.boundariesNetworkModel,
+    model = this.model.boundariesNetworkModel,
     useDropout = useDropout,
     propagateToInput = true)
 
