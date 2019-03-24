@@ -7,7 +7,6 @@
 
 package com.kotlinnlp.neuraltokenizer
 
-import com.kotlinnlp.simplednn.core.embeddings.EmbeddingsOptimizer
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.UpdateMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGradMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
@@ -32,57 +31,43 @@ class NeuralTokenizerOptimizer(
   /**
    * The Optimizer of the BiRNN model of the charsEncoder.
    */
-  val charsEncoderOptimizer = ParamsOptimizer(
-    params = this.model.biRNN.model,
-    updateMethod = charsEncoderUpdateMethod)
+  val charsEncoderOptimizer = ParamsOptimizer(charsEncoderUpdateMethod)
 
   /**
    * The Optimizer of the model boundariesClassifier.
    */
-  val boundariesClassifierOptimizer = ParamsOptimizer(
-    params = this.model.boundariesNetworkModel,
-    updateMethod = boundariesClassifierUpdateMethod)
+  val boundariesClassifierOptimizer = ParamsOptimizer(boundariesClassifierUpdateMethod)
 
   /**
    * The Optimizer of the embeddings vectors.
    */
-  val embeddingsOptimizer = EmbeddingsOptimizer(
-    embeddingsMap = this.model.embeddings,
-    updateMethod = embeddingsUpdateMethod)
+  val embeddingsOptimizer = ParamsOptimizer(embeddingsUpdateMethod)
+
+  /**
+   * List of all the optimizers.
+   */
+  private val optimizers = listOf(
+    this.charsEncoderOptimizer,
+    this.boundariesClassifierOptimizer,
+    this.embeddingsOptimizer)
 
   /**
    * Update the parameters of the neural element associated to this optimizer.
    */
-  override fun update() {
-    this.charsEncoderOptimizer.update()
-    this.boundariesClassifierOptimizer.update()
-    this.embeddingsOptimizer.update()
-  }
+  override fun update() = this.optimizers.forEach { it.update() }
 
   /**
    * Method to call every new epoch.
    */
-  override fun newEpoch() {
-    this.charsEncoderOptimizer.newEpoch()
-    this.boundariesClassifierOptimizer.newEpoch()
-    this.embeddingsOptimizer.newEpoch()
-  }
+  override fun newEpoch() = this.optimizers.forEach { it.newEpoch() }
 
   /**
    * Method to call every new batch.
    */
-  override fun newBatch() {
-    this.charsEncoderOptimizer.newBatch()
-    this.boundariesClassifierOptimizer.newBatch()
-    this.embeddingsOptimizer.newBatch()
-  }
+  override fun newBatch() = this.optimizers.forEach { it.newBatch() }
 
   /**
    * Method to call every new example.
    */
-  override fun newExample() {
-    this.charsEncoderOptimizer.newExample()
-    this.boundariesClassifierOptimizer.newExample()
-    this.embeddingsOptimizer.newExample()
-  }
+  override fun newExample() = this.optimizers.forEach { it.newExample() }
 }

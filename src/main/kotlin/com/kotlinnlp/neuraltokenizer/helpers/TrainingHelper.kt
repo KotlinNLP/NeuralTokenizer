@@ -244,7 +244,7 @@ class TrainingHelper(
 
     this.tokenizer.charsEncoder.getInputErrors(copy = false).forEachIndexed { i, errors ->
       this.optimizer.embeddingsOptimizer.accumulate(
-        embeddingKey = segment[i],
+        params = this.tokenizer.model.embeddings[segment[i]],
         errors = errors.getRange(0, errors.length - this.tokenizer.model.addingFeaturesSize)
       )
     }
