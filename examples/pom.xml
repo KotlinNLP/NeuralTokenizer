@@ -17,7 +17,7 @@
         <xenocom.version>0.0.5</xenocom.version>
         <argparser.version>2.0.7</argparser.version>
         <neuraltokenizer.version>0.4.6</neuraltokenizer.version>
-        <linguisticdescription.version>0.11.0</linguisticdescription.version>
+        <linguisticdescription.version>0.12.0</linguisticdescription.version>
         <simplednn.version>0.13.1</simplednn.version>
     </properties>
 
