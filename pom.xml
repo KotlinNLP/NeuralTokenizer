@@ -62,7 +62,7 @@
         <klaxon.version>3.0.5</klaxon.version>
         <simplednn.version>0.13.1</simplednn.version>
         <linguisticdescription.version>0.11.0</linguisticdescription.version>
-        <utils.version>2.1.1</utils.version>
+        <utils.version>2.1.2</utils.version>
     </properties>
 
     <repositories>
