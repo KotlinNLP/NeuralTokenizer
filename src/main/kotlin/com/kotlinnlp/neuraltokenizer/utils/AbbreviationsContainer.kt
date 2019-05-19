@@ -31,7 +31,7 @@ class AbbreviationsContainer(resPath: String) {
    */
   private fun readAbbreviations(resPath: String): Set<String> {
 
-    val lines = this.javaClass.getResource(resPath).readText().split("\n")
+    val lines = this.javaClass.getResourceAsStream(resPath).reader().readText().split("\n")
     val abbreviations = mutableSetOf<String>()
 
     lines.forEach { line -> abbreviations.add(line) }

@@ -7,12 +7,13 @@
 
 package com.kotlinnlp.neuraltokenizer.utils
 
+import java.io.File
 import java.nio.file.Paths
 
 /**
  * A set of common abbreviations per language iso-code.
  */
 internal val abbreviations = mapOf(
-  "it" to AbbreviationsContainer(Paths.get("/", "abbreviations", "it.txt").toString()),
-  "en" to AbbreviationsContainer(Paths.get("/", "abbreviations", "en.txt").toString())
+  "it" to AbbreviationsContainer(Paths.get(File.separator, "abbreviations", "it.txt").toString()),
+  "en" to AbbreviationsContainer(Paths.get(File.separator, "abbreviations", "en.txt").toString())
 )
