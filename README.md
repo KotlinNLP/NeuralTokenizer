@@ -13,7 +13,7 @@ NeuralTokenizer is part of [KotlinNLP](http://kotlinnlp.com/ "KotlinNLP").
 <dependency>
     <groupId>com.kotlinnlp</groupId>
     <artifactId>neuraltokenizer</artifactId>
-    <version>0.4.5</version>
+    <version>0.4.7</version>
 </dependency>
 ```
 
