@@ -425,7 +425,8 @@ class NeuralTokenizer(
     val start: Int
 
     if (this.curSentenceTokens.size == 0) {
-      index = 0
+      // don't reset the index every sentence
+      index = if (this.sentences.isEmpty()) 0 else this.sentences.last().tokens.size
       start = this.getFirstTokenStart()
 
     } else {
