@@ -54,13 +54,29 @@ fun readDataset(filename: String): Dataset {
 }
 
 /**
- * Merge the given [dataset] into a unique sentence with its chars classification.
+ * A tokenizer dataset that has been merged into a single text.
  *
- * @param dataset a tokenizer dataset as
- *
- * @return a Pair containing the full text and the corresponding gold classifications
+ * @property fullText the full text obtained merging all the sentences of the dataset
+ * @property charsClassification the chars classification of the full text
  */
-fun mergeDataset(dataset: Dataset): Pair<String, CharsClassification> {
+internal class MergedDataset(val fullText: String, val charsClassification: CharsClassification) {
+
+  /**
+   * Check requirements.
+   */
+  init {
+    require(this.fullText.length == this.charsClassification.size)
+  }
+}
+
+/**
+ * Merge a given dataset into a unique text with its chars classification.
+ *
+ * @param dataset a tokenizer dataset
+ *
+ * @return a merged dataset
+ */
+internal fun mergeDataset(dataset: Dataset): MergedDataset {
 
   val fullText = StringBuffer()
   val fullClassifications = ArrayList<Int>()
@@ -74,18 +90,18 @@ fun mergeDataset(dataset: Dataset): Pair<String, CharsClassification> {
     charsClassification.forEach { fullClassifications.add(it) }
   }
 
-  return Pair(fullText.toString(), fullClassifications)
+  return MergedDataset(fullText = fullText.toString(), charsClassification = fullClassifications)
 }
 
 /**
- * Shuffle the given [dataset].
+ * Shuffle a given dataset.
  *
- * @param dataset a tokenizer [Dataset]
- * @param shuffler the [Shuffler] to shuffle the [dataset]
+ * @param dataset a tokenizer dataset
+ * @param shuffler the helper to shuffle the dataset
  *
- * @return a new shuffled [Dataset]
+ * @return a new shuffled dataset
  */
-fun shuffleDataset(dataset: Dataset, shuffler: Shuffler): Dataset {
+internal fun shuffleDataset(dataset: Dataset, shuffler: Shuffler): Dataset {
 
   val exampleIndices = ExamplesIndices(size = dataset.size, shuffler = shuffler)
 

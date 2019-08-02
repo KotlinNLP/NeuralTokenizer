@@ -78,7 +78,10 @@ class TrainingHelper(
       val mergedSentences = mergeDataset(
         dataset = if (shuffler != null) shuffleDataset(dataset = trainingSet, shuffler = shuffler) else trainingSet)
 
-      this.trainEpoch(text = mergedSentences.first, goldClassifications = mergedSentences.second, batchSize = batchSize)
+      this.trainEpoch(
+        text = mergedDataset.fullText,
+        goldClassifications = mergedDataset.charsClassification,
+        batchSize = batchSize)
 
       println("Elapsed time: %s".format(this.formatElapsedTime()))
 
