@@ -78,15 +78,12 @@ class Evaluator(
     var start = 0
 
     return dataset.mapIndexed { i, (text, charsClassification) ->
-
-      val sentence = Sentence(
+      Sentence(
         position = Position(index = i, start = start, end = start + text.lastIndex),
         tokens = this.buildDatasetTokens(text = text, charsClassification = charsClassification, sentenceStart = start)
-      )
-
-      start = sentence.position.end + 1
-
-      sentence
+      ).also {
+        start = it.position.end + 1
+      }
     }
   }
 
