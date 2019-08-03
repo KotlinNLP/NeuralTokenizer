@@ -59,13 +59,13 @@ internal class CommandLineArguments(args: Array<String>) {
   )
 
   /**
-   * The file path of the validation dataset. If given, the tokenizer is validated on it after each epoch.
+   * The file path of the validation dataset.
    */
-  val validationSetPath: String? by parser.storing(
+  val validationSetPath: String by parser.storing(
     "-v",
     "--validation-set-path",
     help="the file path of the validation dataset"
-  ).default { null }
+  )
 
   /**
    * Force parsing all arguments (only read ones are parsed by default).
