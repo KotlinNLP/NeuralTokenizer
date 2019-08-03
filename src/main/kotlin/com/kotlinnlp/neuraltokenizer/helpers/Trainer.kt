@@ -35,11 +35,11 @@ class Trainer(
   modelFilename: String,
   private val dataset: Dataset,
   epochs: Int,
-  batchSize: Int,
+  batchSize: Int = 100,
   private val optimizer: NeuralTokenizerOptimizer,
   evaluator: Evaluator,
   private val shuffler: Shuffler = Shuffler(),
-  useDropout: Boolean,
+  useDropout: Boolean = false,
   verbose: Boolean = true
 ) : Trainer<AnnotatedSentence>(
   modelFilename = modelFilename,
