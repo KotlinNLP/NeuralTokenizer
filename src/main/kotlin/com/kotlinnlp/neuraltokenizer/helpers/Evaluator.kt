@@ -23,7 +23,7 @@ import java.lang.RuntimeException
  * @param model the model to evaluate
  * @param dataset the validation dataset
  */
-class ValidationHelper(
+class Evaluator(
   model: NeuralTokenizerModel,
   private val dataset: Dataset
 ) : Evaluator<AnnotatedSentence>(dataset) {

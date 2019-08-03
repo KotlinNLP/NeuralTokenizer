@@ -9,8 +9,8 @@ package training
 
 import com.kotlinnlp.linguisticdescription.language.getLanguageByIso
 import com.kotlinnlp.neuraltokenizer.*
-import com.kotlinnlp.neuraltokenizer.helpers.TrainingHelper
-import com.kotlinnlp.neuraltokenizer.helpers.ValidationHelper
+import com.kotlinnlp.neuraltokenizer.helpers.Trainer
+import com.kotlinnlp.neuraltokenizer.helpers.Evaluator
 import com.kotlinnlp.neuraltokenizer.utils.Dataset
 import com.kotlinnlp.neuraltokenizer.utils.readDataset
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
@@ -42,7 +42,7 @@ fun main(args: Array<String>) {
     hiddenSize = 60,
     hiddenConnectionType = LayerType.Connection.GRU)
 
-  val helper = TrainingHelper(
+  val helper = Trainer(
     model = model,
     modelFilename = parsedArgs.modelPath,
     optimizer = NeuralTokenizerOptimizer(
@@ -52,7 +52,7 @@ fun main(args: Array<String>) {
     dataset = trainingSet,
     batchSize = 100,
     epochs = parsedArgs.epochs,
-    evaluator = ValidationHelper(model = model, dataset = validationSet),
+    evaluator = Evaluator(model = model, dataset = validationSet),
     shuffler = Shuffler(),
     useDropout = true)
 

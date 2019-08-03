@@ -20,14 +20,14 @@ import java.io.FileOutputStream
  * A helper for the training of a [NeuralTokenizer].
  *
  */
-class TrainingHelper(
+class Trainer(
   private val model: NeuralTokenizerModel,
   modelFilename: String,
   private val dataset: Dataset,
   epochs: Int,
   batchSize: Int,
   private val optimizer: NeuralTokenizerOptimizer,
-  evaluator: ValidationHelper,
+  evaluator: Evaluator,
   private val shuffler: Shuffler = Shuffler(),
   useDropout: Boolean,
   verbose: Boolean = true
@@ -112,13 +112,13 @@ class TrainingHelper(
 
       val segmentRange = IntRange(
         start = startIndex,
-        endInclusive = minOf(startIndex + this@TrainingHelper.tokenizer.model.maxSegmentSize, textLength) - 1)
+        endInclusive = minOf(startIndex + this@Trainer.tokenizer.model.maxSegmentSize, textLength) - 1)
 
       this.segmentGoldClassification = this.mergedDataset.charsClassification.slice(segmentRange)
 
       callback(segmentRange)
 
-      val shiftCharIndex = this@TrainingHelper.getShiftCharIndex()
+      val shiftCharIndex = this@Trainer.getShiftCharIndex()
 
       progress.tick(amount = shiftCharIndex + 1)
 
@@ -278,7 +278,7 @@ class TrainingHelper(
   /**
    * Calculate the accuracy of the model, giving an higher weight to the sentences metric.
    *
-   * @param stats the validation statistics given by the [ValidationHelper]
+   * @param stats the validation statistics given by the [Evaluator]
    *
    * @return the accuracy of the [tokenizer]
    */

@@ -9,7 +9,7 @@ package evaluation
 
 import com.kotlinnlp.neuraltokenizer.*
 import com.kotlinnlp.neuraltokenizer.helpers.EvaluationStats
-import com.kotlinnlp.neuraltokenizer.helpers.ValidationHelper
+import com.kotlinnlp.neuraltokenizer.helpers.Evaluator
 import com.kotlinnlp.neuraltokenizer.utils.readDataset
 import java.io.File
 import java.io.FileInputStream
@@ -39,7 +39,7 @@ fun main(args: Array<String>) {
   println("\n-- START VALIDATION ON %d TEST SENTENCES".format(validationSet.size))
   println("Language: ${model.language}")
 
-  val helper = ValidationHelper(model = model, dataset = validationSet)
+  val helper = Evaluator(model = model, dataset = validationSet)
   val stats: EvaluationStats = helper.evaluate()
 
   println("\n-- STATISTICS")
