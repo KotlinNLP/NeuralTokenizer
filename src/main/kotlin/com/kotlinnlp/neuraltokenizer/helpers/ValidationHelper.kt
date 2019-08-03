@@ -153,21 +153,14 @@ class ValidationHelper(model: NeuralTokenizerModel) {
    * @param elements1 a list of positionable elements
    * @param elements2 a list of positionable elements
    *
-   * @return the count of elements that have the same position within the two lists
+   * @return the number of elements that have the same position within the two lists (already sorted)
    */
   private fun countSamePositionElements(elements1: List<Positionable>, elements2: List<Positionable>): Int {
 
-    var correct = 0
-    var index2 = 0
+    val s1: Set<Pair<Int, Int>> = elements1.asSequence().map { Pair(it.position.start, it.position.end) }.toSet()
+    val s2: Set<Pair<Int, Int>> = elements2.asSequence().map { Pair(it.position.start, it.position.end) }.toSet()
 
-    elements1.forEach { element1 ->
-
-      while (index2 < elements2.lastIndex && elements2[index2].position.end < element1.position.end) index2++
-
-      if (elements2[index2].position == element1.position) correct++
-    }
-
-    return correct
+    return s1.intersect(s2).size
   }
 
   /**
