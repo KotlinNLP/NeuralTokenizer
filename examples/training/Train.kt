@@ -10,6 +10,7 @@ package training
 import com.kotlinnlp.linguisticdescription.language.getLanguageByIso
 import com.kotlinnlp.neuraltokenizer.*
 import com.kotlinnlp.neuraltokenizer.helpers.TrainingHelper
+import com.kotlinnlp.neuraltokenizer.helpers.ValidationHelper
 import com.kotlinnlp.neuraltokenizer.utils.Dataset
 import com.kotlinnlp.neuraltokenizer.utils.readDataset
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
@@ -29,33 +30,35 @@ fun main(args: Array<String>) {
     println("Reading training set from '$it'...")
     readDataset(it)
   }
-  val validationSet: Dataset? = parsedArgs.validationSetPath?.let {
+  val validationSet: Dataset = parsedArgs.validationSetPath.let {
     println("Reading validation set from '$it'...")
     readDataset(it)
   }
+
   val model = NeuralTokenizerModel(
     language = getLanguageByIso(parsedArgs.langCode.toLowerCase()),
     maxSegmentSize = 50,
     charEmbeddingsSize = 30,
     hiddenSize = 60,
     hiddenConnectionType = LayerType.Connection.GRU)
+
   val helper = TrainingHelper(
-    tokenizer = NeuralTokenizer(model = model, useDropout = true),
+    model = model,
+    modelFilename = parsedArgs.modelPath,
     optimizer = NeuralTokenizerOptimizer(
-      model = model,
       charsEncoderUpdateMethod = ADAMMethod(stepSize = 0.001),
       boundariesClassifierUpdateMethod = ADAMMethod(stepSize = 0.0001),
-      embeddingsUpdateMethod = ADAMMethod(stepSize = 0.001)))
-
-  println("-- MODEL\n")
-  println(model)
-  println()
-
-  helper.train(
-    trainingSet = trainingSet,
+      embeddingsUpdateMethod = ADAMMethod(stepSize = 0.001)),
+    dataset = trainingSet,
     batchSize = 100,
     epochs = parsedArgs.epochs,
+    evaluator = ValidationHelper(model = model, dataset = validationSet),
     shuffler = Shuffler(),
-    validationSet = validationSet,
-    modelFilename = parsedArgs.modelPath)
+    useDropout = true)
+
+  println("\n-- MODEL")
+  println(model)
+
+  println("\n-- TRAINING")
+  helper.train()
 }

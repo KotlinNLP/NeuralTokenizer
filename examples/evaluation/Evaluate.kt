@@ -8,6 +8,7 @@
 package evaluation
 
 import com.kotlinnlp.neuraltokenizer.*
+import com.kotlinnlp.neuraltokenizer.helpers.EvaluationStats
 import com.kotlinnlp.neuraltokenizer.helpers.ValidationHelper
 import com.kotlinnlp.neuraltokenizer.utils.readDataset
 import java.io.File
@@ -27,25 +28,20 @@ fun main(args: Array<String>) {
     NeuralTokenizerModel.load(FileInputStream(File(it)))
   }
 
-  val testSet = parsedArgs.validationSetPath.let {
+  val validationSet = parsedArgs.validationSetPath.let {
     println("Reading validation set from '$it'...")
     readDataset(it)
   }
 
-  println("\n--MODEL")
+  println("\n-- MODEL")
   println(model)
 
-  println("\n-- START VALIDATION ON %d TEST SENTENCES".format(testSet.size))
+  println("\n-- START VALIDATION ON %d TEST SENTENCES".format(validationSet.size))
   println("Language: ${model.language}")
 
-  val helper = ValidationHelper(model)
-  val stats: ValidationHelper.EvaluationStats = helper.validate(testSet)
+  val helper = ValidationHelper(model = model, dataset = validationSet)
+  val stats: EvaluationStats = helper.evaluate()
 
-  println()
-
-  println("Tokens accuracy     ->   Precision: %.2f%%  |  Recall: %.2f%%  |  F1 Score: %.2f%%"
-    .format(100.0 * stats.tokens.precision, 100.0 * stats.tokens.recall, 100.0 * stats.tokens.f1Score))
-
-  println("Sentences accuracy  ->   Precision: %.2f%%  |  Recall: %.2f%%  |  F1 Score: %.2f%%"
-    .format(100.0 * stats.sentences.precision, 100.0 * stats.sentences.recall, 100.0 * stats.sentences.f1Score))
+  println("\n-- STATISTICS")
+  println(stats)
 }
