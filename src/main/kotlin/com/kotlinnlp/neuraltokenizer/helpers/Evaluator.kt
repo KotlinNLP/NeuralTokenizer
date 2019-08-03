@@ -61,7 +61,9 @@ class Evaluator(
     return EvaluationStats(
       tokens = this.buildMetric(outputElements = outputTokens, goldElements = goldTokens),
       sentences = this.buildMetric(outputElements = outputSentences, goldElements = goldSentences)
-    )
+    ).apply {
+      accuracy = tokens.f1Score * Math.pow(sentences.f1Score, 0.5)
+    }
   }
 
   /**

@@ -284,16 +284,4 @@ class Trainer(
   override fun dumpModel() {
     this.tokenizer.model.dump(FileOutputStream(File(modelFilename)))
   }
-
-  /**
-   * Calculate the accuracy of the model, giving an higher weight to the sentences metric.
-   *
-   * @param stats the validation statistics given by the [Evaluator]
-   *
-   * @return the accuracy of the [tokenizer]
-   */
-  private fun getAccuracy(stats: EvaluationStats): Double {
-
-    return stats.tokens.f1Score * Math.pow(stats.sentences.f1Score, 0.5)
-  }
 }
