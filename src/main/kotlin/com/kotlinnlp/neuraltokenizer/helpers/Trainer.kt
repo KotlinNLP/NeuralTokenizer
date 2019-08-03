@@ -17,8 +17,18 @@ import java.io.File
 import java.io.FileOutputStream
 
 /**
- * A helper for the training of a [NeuralTokenizer].
+ * A helper for the training of a [NeuralTokenizerModel].
  *
+ * @param model the model to train
+ * @param modelFilename the name of the file in which to save the serialized model
+ * @param dataset the training dataset
+ * @param epochs the number of training epochs
+ * @param batchSize the size of each batch (default 100)
+ * @param optimizer the parameters optimizers wrapper
+ * @param evaluator the helper for the evaluation (default null)
+ * @param shuffler used to shuffle the examples before each epoch (with pseudo random by default)
+ * @param useDropout whether to apply the dropout during the forward (default = false)
+ * @param verbose whether to print info about the training progress and timing (default = true)
  */
 class Trainer(
   private val model: NeuralTokenizerModel,
