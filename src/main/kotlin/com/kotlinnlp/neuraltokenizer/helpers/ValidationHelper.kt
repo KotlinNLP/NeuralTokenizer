@@ -11,14 +11,27 @@ import com.kotlinnlp.linguisticdescription.sentence.token.properties.Position
 import com.kotlinnlp.linguisticdescription.sentence.token.properties.Positionable
 import com.kotlinnlp.neuraltokenizer.*
 import com.kotlinnlp.neuraltokenizer.utils.*
+import com.kotlinnlp.simplednn.helpers.Evaluator
+import com.kotlinnlp.simplednn.helpers.Statistics
 import com.kotlinnlp.utils.Timer
+import com.kotlinnlp.utils.stats.MetricCounter
+import java.lang.RuntimeException
 
 /**
- * A helper for the validation of a [NeuralTokenizer].
+ * Helper for the evaluation of a [NeuralTokenizerModel].
  *
- * @param model the model
+ * @param model the model to evaluate
+ * @param dataset the validation dataset
  */
-class ValidationHelper(model: NeuralTokenizerModel) {
+class ValidationHelper(
+  model: NeuralTokenizerModel,
+  private val dataset: Dataset
+) : Evaluator<AnnotatedSentence>(dataset) {
+
+  /**
+   * Overridden for inheritance but not used.
+   */
+  override val stats: Statistics get() = throw RuntimeException("Not used")
 
   /**
    * The tokenizer.
@@ -26,47 +39,33 @@ class ValidationHelper(model: NeuralTokenizerModel) {
   private val tokenizer = NeuralTokenizer(model = model, useDropout = false)
 
   /**
-   * Statistics given by the CoNLL evaluation script.
-   *
-   * @property tokens tokens stats from CoNLL evaluation script
-   * @property sentences sentences stats from CoNLL evaluation script
+   * Overridden for inheritance but replaced by the following method.
    */
-  data class EvaluationStats(val tokens: CoNLLStats, val sentences: CoNLLStats)
+  override fun evaluate(example: AnnotatedSentence) {}
 
   /**
-   * Statistics given by the CoNLL evaluation script for a single metric.
+   * Evaluate the model.
    *
-   * @property precision precision
-   * @property recall recall
-   * @property f1Score the F1 score
+   * @return the validation statistics
    */
-  data class CoNLLStats(val precision: Double, val recall: Double, val f1Score: Double)
-
-  /**
-   * Validate the [tokenizer] using the given test dataset.
-   *
-   * @param testSet the test dataset to validate the [tokenizer]
-   *
-   * @return CoNLL evaluation statistics
-   */
-  fun validate(testSet: Dataset): EvaluationStats {
+  override fun evaluate(): EvaluationStats {
 
     val timer = Timer()
-    val outputSentences: List<Sentence> = this.tokenizer.tokenize(text = mergeDataset(testSet).first).fixOffset()
-    val goldSentences: List<Sentence> = this.buildDatasetSentences(testSet)
+    val outputSentences: List<Sentence> = this.tokenizer.tokenize(text = mergeDataset(this.dataset).fullText).fixOffset()
+    val goldSentences: List<Sentence> = this.buildDatasetSentences(this.dataset)
     val outputTokens: List<Token> = outputSentences.flatMap { it.tokens }
     val goldTokens: List<Token> = goldSentences.flatMap { it.tokens }
 
     println("Elapsed time: %s".format(timer.formatElapsedTime()))
 
     return EvaluationStats(
-      tokens = this.buildMetricStats(outputElements = outputTokens, goldElements = goldTokens),
-      sentences = this.buildMetricStats(outputElements = outputSentences, goldElements = goldSentences)
+      tokens = this.buildMetric(outputElements = outputTokens, goldElements = goldTokens),
+      sentences = this.buildMetric(outputElements = outputSentences, goldElements = goldSentences)
     )
   }
 
   /**
-   * Build a sentences list from the given [dataset], like they compose a unique global text.
+   * Build a sentences list from the given [dataset], such as they compose a unique global text.
    *
    * @param dataset a dataset for the [tokenizer]
    *
@@ -126,7 +125,7 @@ class ValidationHelper(model: NeuralTokenizerModel) {
 
   /**
    * Copy this list of sentences, adding an incremental offset to their position, in order to simulate a unique text
-   * composed by the sequence of all the sentences.
+   * composed by the concatenation of all the sentences.
    *
    * @return a list containing a copy of all the sentences as a unique sequence
    */
@@ -150,6 +149,20 @@ class ValidationHelper(model: NeuralTokenizerModel) {
   }
 
   /**
+   * @param outputElements the list of output elements
+   * @param goldElements the list of gold elements
+   *
+   * @return the statistic metrics (precision, recall and F1 score) about the comparison of the output elements respect
+   *         to the gold elements
+   */
+  private fun buildMetric(outputElements: List<Positionable>, goldElements: List<Positionable>): MetricCounter =
+    MetricCounter().apply {
+      truePos = countSamePositionElements(outputElements, goldElements)
+      falsePos = outputElements.size - truePos
+      falseNeg = goldElements.size - truePos
+    }
+
+  /**
    * @param elements1 a list of positionable elements
    * @param elements2 a list of positionable elements
    *
@@ -161,25 +174,5 @@ class ValidationHelper(model: NeuralTokenizerModel) {
     val s2: Set<Pair<Int, Int>> = elements2.asSequence().map { Pair(it.position.start, it.position.end) }.toSet()
 
     return s1.intersect(s2).size
-  }
-
-  /**
-   * @param outputElements the list of output elements
-   * @param goldElements the list of gold elements
-   *
-   * @return CoNLL statistics (precision, recall and F1 score) about the comparison of the output elements respect to
-   *         the gold elements
-   */
-  private fun buildMetricStats(outputElements: List<Positionable>, goldElements: List<Positionable>): CoNLLStats {
-
-    val correct: Double = this.countSamePositionElements(outputElements, goldElements).toDouble()
-    val outputTotal: Int = outputElements.size
-    val goldTotal: Int = goldElements.size
-
-    return CoNLLStats( // skip first field (metrics)
-      precision = if (outputTotal > 0) correct / outputTotal else 0.0,
-      recall = if (goldTotal > 0) correct / goldTotal else 0.0,
-      f1Score = if (outputTotal > 0 && goldTotal > 0) 2 * correct / (outputTotal + goldTotal) else 0.0
-    )
   }
 }

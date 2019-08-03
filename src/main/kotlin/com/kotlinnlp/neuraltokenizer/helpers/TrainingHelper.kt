@@ -9,6 +9,7 @@ package com.kotlinnlp.neuraltokenizer.helpers
 
 import com.kotlinnlp.neuraltokenizer.*
 import com.kotlinnlp.neuraltokenizer.utils.*
+import com.kotlinnlp.simplednn.helpers.Trainer
 import com.kotlinnlp.simplednn.simplemath.ndarray.dense.DenseNDArray
 import com.kotlinnlp.utils.Shuffler
 import com.kotlinnlp.utils.progressindicator.ProgressIndicatorBar
@@ -18,28 +19,33 @@ import java.io.FileOutputStream
 /**
  * A helper for the training of a [NeuralTokenizer].
  *
- * @property tokenizer the [NeuralTokenizer] to train
- * @property optimizer the [NeuralTokenizerOptimizer] of the [tokenizer]
  */
 class TrainingHelper(
-  val tokenizer: NeuralTokenizer,
-  val optimizer: NeuralTokenizerOptimizer = NeuralTokenizerOptimizer(tokenizer.model)
+  private val model: NeuralTokenizerModel,
+  modelFilename: String,
+  private val dataset: Dataset,
+  epochs: Int,
+  batchSize: Int,
+  private val optimizer: NeuralTokenizerOptimizer,
+  evaluator: ValidationHelper,
+  private val shuffler: Shuffler = Shuffler(),
+  useDropout: Boolean,
+  verbose: Boolean = true
+) : Trainer<AnnotatedSentence>(
+  modelFilename = modelFilename,
+  optimizers = optimizer.optimizers,
+  examples = dataset,
+  epochs = epochs,
+  batchSize = batchSize,
+  evaluator = evaluator,
+  shuffler = shuffler,
+  verbose = verbose
 ) {
 
   /**
-   * When timing started.
+   * The neural tokenizer built with the given model.
    */
-  private var startTime: Long = 0
-
-  /**
-   * The [ValidationHelper] used to validate each epoch when a not null validation dataset is passed.
-   */
-  private val validationHelper = ValidationHelper(this.tokenizer.model)
-
-  /**
-   * The best accuracy reached during the training.
-   */
-  private var bestAccuracy: Double = 0.0
+  private val tokenizer = NeuralTokenizer(model = this.model, useDropout = useDropout)
 
   /**
    * The gold classification of the current segment.
@@ -47,59 +53,16 @@ class TrainingHelper(
   private lateinit var segmentGoldClassification: List<Int>
 
   /**
-   * Train the [tokenizer] using the chars classifications of the [trainingSet] as reference of correct predictions.
-   *
-   * @param trainingSet the [Dataset] to train the [tokenizer]
-   * @param batchSize the size of the training batches (default 1)
-   * @param epochs number of epochs
-   * @param validationSet the [Dataset] used to validate each epoch (default null)
-   * @param shuffler the [Shuffler] to shuffle the training sentences before each epoch (default null)
-   * @param modelFilename the name of the file in which to save the best trained model
+   * The dataset merged into a unique text with its chars classification.
    */
-  fun train(trainingSet: Dataset,
-            batchSize: Int = 1,
-            epochs: Int = 3,
-            validationSet: Dataset? = null,
-            shuffler: Shuffler? = null,
-            modelFilename: String? = null) {
-
-    println("-- START TRAINING ON %d SENTENCES".format(trainingSet.size))
-
-    this.resetValidationStats()
-
-    this.initEmbeddings(trainingSet)
-
-    (0 until epochs).forEach { i ->
-
-      println("\nEpoch ${i + 1} of $epochs")
-
-      this.startTiming()
-
-      val mergedSentences = mergeDataset(
-        dataset = if (shuffler != null) shuffleDataset(dataset = trainingSet, shuffler = shuffler) else trainingSet)
-
-      this.trainEpoch(
-        text = mergedDataset.fullText,
-        goldClassifications = mergedDataset.charsClassification,
-        batchSize = batchSize)
-
-      println("Elapsed time: %s".format(this.formatElapsedTime()))
-
-      if (validationSet != null) {
-        this.validateAndSaveModel(validationSet = validationSet, modelFilename = modelFilename)
-      }
-    }
-  }
+  private lateinit var mergedDataset: MergedDataset
 
   /**
-   * Initialize the Embeddings of the [tokenizer] model, associating them to the chars contained in the given
-   * [trainingSet].
-   *
-   * @param trainingSet the dataset to train the [tokenizer]
+   * Initialize the Embeddings of the tokenizer model, associating them to the chars contained in the training dataset.
    */
-  private fun initEmbeddings(trainingSet: Dataset) {
+  init {
 
-    trainingSet.forEach { (sentence, _) ->
+    this.dataset.forEach { (sentence, _) ->
       sentence.forEach { char ->
         if (char !in this.tokenizer.model.embeddings) {
           this.tokenizer.model.embeddings.set(key = char)
@@ -109,59 +72,51 @@ class TrainingHelper(
   }
 
   /**
-   * Train the [tokenizer] on one epoch, using the [goldClassifications] as reference of correct predictions.
-   *
-   * @param text the text to tokenize
-   * @param goldClassifications an array containing the correct classification of each character
-   * @param batchSize the size of the training batches
+   * Train the model over an epoch, grouping examples in batches, shuffling them before with the given shuffler.
    */
-  private fun trainEpoch(text: String, goldClassifications: CharsClassification, batchSize: Int) {
-
-    require(text.length == goldClassifications.size)
+  override fun trainEpoch() {
 
     var examplesCount = 0
 
-    this.optimizer.newEpoch()
+    this.mergedDataset = mergeDataset(dataset = shuffleDataset(dataset = this.dataset, shuffler = this.shuffler))
 
-    this.forEachSegment(text = text, goldClassifications = goldClassifications) { (startIndex, endIndex) ->
+    this.newEpoch()
+
+    this.forEachSegment { range ->
 
       examplesCount++
 
-      this.learnFromExample(text = text, start = startIndex, length = endIndex - startIndex)
+      this.learnFromExample(range)
 
-      if (examplesCount % batchSize == 0) {
+      if (examplesCount % this.batchSize == 0)
         this.endOfBatch()
-      }
     }
 
-    if (examplesCount % batchSize > 0) { // last batch with remaining examples
+    if (examplesCount % this.batchSize > 0) // last batch in case of remaining examples
       this.endOfBatch()
-    }
   }
 
   /**
-   * Iterate over the segments of training extracted shifting the text using the [goldClassifications].
+   * Iterate over the segments of training extracted shifting the text using the gold chars classifications.
    * Before returning the segment, it is classified from the tokenizer and the [segmentGoldClassification] is set.
    *
-   * @param text the text to tokenize
-   * @param goldClassifications the gold classification of each character of the [text]
-   * @param callback a callback called for each segment (it takes a pair of <start(inclusive), end(exclusive)> indices
-   *                 as argument)
+   * @param callback a callback called for each segment (it takes the range of segment indices as argument)
    */
-  private fun forEachSegment(text: String,
-                              goldClassifications: CharsClassification,
-                              callback: (Pair<Int, Int>) -> Unit) {
+  private fun forEachSegment(callback: (IntRange) -> Unit) {
 
-    val progress = ProgressIndicatorBar(total = text.length)
+    val textLength: Int = this.mergedDataset.fullText.length
+    val progress = ProgressIndicatorBar(total = textLength)
     var startIndex = 0
 
-    while (startIndex < text.length) {
+    while (startIndex < textLength) {
 
-      val endIndex: Int = minOf(startIndex + this@TrainingHelper.tokenizer.model.maxSegmentSize, text.length)
+      val segmentRange = IntRange(
+        start = startIndex,
+        endInclusive = minOf(startIndex + this@TrainingHelper.tokenizer.model.maxSegmentSize, textLength) - 1)
 
-      this@TrainingHelper.segmentGoldClassification = goldClassifications.subList(startIndex, endIndex)
+      this.segmentGoldClassification = this.mergedDataset.charsClassification.slice(segmentRange)
 
-      callback(Pair(startIndex, endIndex))
+      callback(segmentRange)
 
       val shiftCharIndex = this@TrainingHelper.getShiftCharIndex()
 
@@ -219,21 +174,34 @@ class TrainingHelper(
   }
 
   /**
+   * Overridden for inheritance but replaced by the following method.
+   */
+  override fun learnFromExample(example: AnnotatedSentence) {}
+
+  /**
    * Learn from the given segment, comparing its gold classification with the one of the [tokenizer] and accumulate
    * the propagated errors.
    *
-   * @param text the whole text to tokenize
-   * @param start the start index of the segment
-   * @param length the length of the segment
+   * @param segmentRange the range of char indices of the segment
    */
-  private fun learnFromExample(text: String, start: Int, length: Int) {
+  private fun learnFromExample(segmentRange: IntRange) {
 
-    this.optimizer.newExample()
+    this.newExample()
 
-    this.backward(segmentClassification = this.tokenizer.classifyChars(text = text, start = start, length = length))
+    val segmentClassification: List<DenseNDArray> = this.tokenizer.classifyChars(
+      text = this.mergedDataset.fullText,
+      start = segmentRange.start,
+      length = segmentRange.count())
 
-    this.accumulateErrors(segment = text.subSequence(start, start + length))
+    this.backward(segmentClassification)
+
+    this.accumulateErrors(segment = this.mergedDataset.fullText.subSequence(segmentRange))
   }
+
+  /**
+   * Overridden for inheritance but replaced by the following method.
+   */
+  override fun accumulateErrors() {}
 
   /**
    * Accumulate the parameters errors into the optimizer.
@@ -242,11 +210,11 @@ class TrainingHelper(
    */
   private fun accumulateErrors(segment: CharSequence) {
 
-    this.optimizer.charsEncoderOptimizer.accumulate(this.tokenizer.charsEncoder.getParamsErrors(copy = false))
-    this.optimizer.boundariesClassifierOptimizer.accumulate(this.tokenizer.boundariesClassifier.getParamsErrors(copy = false))
+    this.optimizer.charsEncoder.accumulate(this.tokenizer.charsEncoder.getParamsErrors(copy = false))
+    this.optimizer.boundariesClassifier.accumulate(this.tokenizer.boundariesClassifier.getParamsErrors(copy = false))
 
     this.tokenizer.charsEncoder.getInputErrors(copy = false).forEachIndexed { i, errors ->
-      this.optimizer.embeddingsOptimizer.accumulate(
+      this.optimizer.embeddings.accumulate(
         params = this.tokenizer.model.embeddings[segment[i]],
         errors = errors.getRange(0, errors.length - this.tokenizer.model.addingFeaturesSize)
       )
@@ -257,8 +225,8 @@ class TrainingHelper(
    * Catch the event that corresponds to the end of a training batch.
    */
   private fun endOfBatch() {
-    this.optimizer.newBatch()
-    this.optimizer.update()
+    this.newBatch()
+    this.optimizers.forEach { it.update() }
   }
 
   /**
@@ -301,53 +269,10 @@ class TrainingHelper(
   }
 
   /**
-   * Validate the [tokenizer] on the [validationSet] and save its best model to [modelFilename].
-   *
-   * @param validationSet the validation dataset to validate the [tokenizer]
-   * @param modelFilename the name of the file in which to save the best model of the [tokenizer] (default = null)
+   * Dump the model to file.
    */
-  private fun validateAndSaveModel(validationSet: Dataset, modelFilename: String?) {
-
-    val accuracy = this.validateEpoch(validationSet)
-
-    if (modelFilename != null && accuracy > this.bestAccuracy) {
-
-      this.bestAccuracy = accuracy
-
-      this.tokenizer.model.dump(FileOutputStream(File(modelFilename)))
-
-      println("NEW BEST ACCURACY! Model saved to \"$modelFilename\"")
-    }
-  }
-
-  /**
-   * Validate the [tokenizer] after trained it on an epoch.
-   *
-   * @param validationSet the validation dataset to validate the [tokenizer]
-   *
-   * @return the current accuracy of the [tokenizer]
-   */
-  private fun validateEpoch(validationSet: Dataset): Double {
-
-    println("Epoch validation on %d sentences".format(validationSet.size))
-
-    val stats: ValidationHelper.EvaluationStats = this.validationHelper.validate(validationSet)
-
-    println("Tokens accuracy     ->   Precision: %.2f%%  |  Recall: %.2f%%  |  F1 Score: %.2f%%"
-      .format(100.0 * stats.tokens.precision, 100.0 * stats.tokens.recall, 100.0 * stats.tokens.f1Score))
-
-    println("Sentences accuracy  ->   Precision: %.2f%%  |  Recall: %.2f%%  |  F1 Score: %.2f%%"
-      .format(100.0 * stats.sentences.precision, 100.0 * stats.sentences.recall, 100.0 * stats.sentences.f1Score))
-
-    return this.getAccuracy(stats)
-  }
-
-  /**
-   * Reset the stats saved during the previous validations.
-   */
-  private fun resetValidationStats() {
-
-    this.bestAccuracy = 0.0
+  override fun dumpModel() {
+    this.tokenizer.model.dump(FileOutputStream(File(modelFilename)))
   }
 
   /**
@@ -357,26 +282,8 @@ class TrainingHelper(
    *
    * @return the accuracy of the [tokenizer]
    */
-  private fun getAccuracy(stats: ValidationHelper.EvaluationStats): Double {
+  private fun getAccuracy(stats: EvaluationStats): Double {
 
     return stats.tokens.f1Score * Math.pow(stats.sentences.f1Score, 0.5)
-  }
-
-  /**
-   * Start registering time.
-   */
-  private fun startTiming() {
-    this.startTime = System.currentTimeMillis()
-  }
-
-  /**
-   * @return the formatted string with elapsed time in seconds and minutes.
-   */
-  private fun formatElapsedTime(): String {
-
-    val elapsedTime = System.currentTimeMillis() - this.startTime
-    val elapsedSecs = elapsedTime / 1000.0
-
-    return "%.3f s (%.1f min)".format(elapsedSecs, elapsedSecs / 60.0)
   }
 }
