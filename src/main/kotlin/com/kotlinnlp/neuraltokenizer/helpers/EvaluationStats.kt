@@ -31,10 +31,10 @@ data class EvaluationStats(val tokens: MetricCounter, val sentences: MetricCount
    */
   override fun toString(): String = """
     - Overall accuracy : %.2f %%
-    - Tokens           : $tokens
-    - Sentences        : $sentences
+    - Tokens           : %s
+    - Sentences        : %s
     """
+    .format(100.0 * this.accuracy, this.tokens, this.sentences)
     .removePrefix("\n")
     .trimIndent()
-    .format(100.0 * this.accuracy)
 }
