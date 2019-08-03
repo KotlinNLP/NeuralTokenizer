@@ -84,8 +84,8 @@ class NeuralTokenizer(
 
     this.initializeTokenization()
 
-    this.forEachSegment(text) { (startIndex, endIndex) ->
-      this.processSegment(text = text, start = startIndex, end = endIndex)
+    this.forEachSegment(text) {
+      this.processSegment(text = text, range = it)
     }
 
     return this.sentences
@@ -116,19 +116,21 @@ class NeuralTokenizer(
    * Iterate over the text segments.
    *
    * @param text the text to tokenize
-   * @param callback a callback called for each segment (it takes a pair of <start(inclusive), end(exclusive)> indices
-   *                 as argument)
+   * @param callback a callback called for each segment (it takes the range of segment indices as argument)
    */
-  private fun forEachSegment(text: String, callback: (Pair<Int, Int>) -> Unit) {
+  private fun forEachSegment(text: String, callback: (IntRange) -> Unit) {
 
     val tokenizer = this@NeuralTokenizer
     var startIndex = 0
 
     while (startIndex < text.length) {
 
-      val endIndex: Int = minOf(startIndex + tokenizer.model.maxSegmentSize, text.length)
+      val segmentRange = IntRange(
+        start = startIndex,
+        endInclusive = minOf(startIndex + tokenizer.model.maxSegmentSize, text.length) - 1
+      )
 
-      callback(Pair(startIndex, endIndex))
+      callback(segmentRange)
 
       startIndex = tokenizer.getLastTokenEndIndex() + this.skippedSpacingChars + tokenizer.curTokenBuffer.length + 1
     }
@@ -144,21 +146,20 @@ class NeuralTokenizer(
   }
 
   /**
-   * Process the segment of [text] between the indices [start] and [end].
+   * Process the segment of [text] within a given [range].
    *
    * @param text the text to tokenize
-   * @param start the start index of the segment (inclusive)
-   * @param end the end index of the segment (exclusive)
+   * @param range the range of char indices of the segment
    */
-  private fun processSegment(text: String, start: Int, end: Int) {
+  private fun processSegment(text: String, range: IntRange) {
 
-    val charsClassification = this.classifyChars(text = text, start = start, length = end - start)
+    val charsClassification = this.classifyChars(text = text, start = range.start, length = range.count())
     val prevSentencesCount: Int = this.sentences.size
     val sentencePrevTokensCount: Int = this.curSentenceTokens.size
 
     charsClassification.forEachIndexed { i, charClassification ->
 
-      val textIndex: Int = start + i
+      val textIndex: Int = range.start + i
 
       this.processChar(
         char = text[textIndex],
