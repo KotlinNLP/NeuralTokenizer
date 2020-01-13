@@ -12,7 +12,6 @@ import com.kotlinnlp.linguisticdescription.sentence.token.properties.Positionabl
 import com.kotlinnlp.neuraltokenizer.*
 import com.kotlinnlp.neuraltokenizer.utils.*
 import com.kotlinnlp.simplednn.helpers.Evaluator
-import com.kotlinnlp.simplednn.helpers.Statistics
 import com.kotlinnlp.utils.Timer
 import com.kotlinnlp.utils.stats.MetricCounter
 import java.lang.RuntimeException
@@ -26,12 +25,12 @@ import java.lang.RuntimeException
 class Evaluator(
   model: NeuralTokenizerModel,
   private val dataset: Dataset
-) : Evaluator<AnnotatedSentence>(dataset) {
+) : Evaluator<AnnotatedSentence, EvaluationStats>(dataset) {
 
   /**
    * Overridden for inheritance but not used.
    */
-  override val stats: Statistics get() = throw RuntimeException("Not used")
+  override val stats: EvaluationStats get() = throw RuntimeException("Not used")
 
   /**
    * The tokenizer.
