@@ -17,8 +17,6 @@
         <xenocom.version>0.0.5</xenocom.version>
         <argparser.version>2.0.7</argparser.version>
         <neuraltokenizer.version>0.4.8</neuraltokenizer.version>
-        <linguisticdescription.version>0.12.2</linguisticdescription.version>
-        <simplednn.version>0.13.3</simplednn.version>
     </properties>
 
     <repositories>
@@ -131,17 +129,6 @@
             <groupId>com.kotlinnlp</groupId>
             <artifactId>neuraltokenizer</artifactId>
             <version>${neuraltokenizer.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>com.kotlinnlp</groupId>
-            <artifactId>linguisticdescription</artifactId>
-            <version>${linguisticdescription.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.kotlinnlp</groupId>
-            <artifactId>simplednn</artifactId>
-            <version>${simplednn.version}</version>
         </dependency>
     </dependencies>
 </project>
