@@ -1,4 +1,4 @@
-# NeuralTokenizer [![GitHub version](https://badge.fury.io/gh/KotlinNLP%2FNeuralTokenizer.svg)](https://badge.fury.io/gh/KotlinNLP%2FNeuralTokenizer) [![Build Status](https://travis-ci.org/KotlinNLP/NeuralTokenizer.svg?branch=master)](https://travis-ci.org/KotlinNLP/NeuralTokenizer)
+# NeuralTokenizer [![Maven Central](https://img.shields.io/maven-central/v/com.kotlinnlp/neuraltokenizer.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22com.kotlinnlp%22%20AND%20a:%22neuraltokenizer%22) [![Build Status](https://travis-ci.org/KotlinNLP/NeuralTokenizer.svg?branch=master)](https://travis-ci.org/KotlinNLP/NeuralTokenizer)
 
 NeuralTokenizer is a very simple to use text tokenizer which uses neural networks from the [SimpleDNN](https://github.com/KotlinNLP/SimpleDNN "SimpleDNN") library.
 
