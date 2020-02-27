@@ -8,9 +8,10 @@
 package com.kotlinnlp.neuraltokenizer.utils
 
 import com.beust.klaxon.JsonArray
-import com.beust.klaxon.Parser
+import com.beust.klaxon.Klaxon
 import com.kotlinnlp.utils.ExamplesIndices
 import com.kotlinnlp.utils.Shuffler
+import java.io.File
 
 typealias CharsClassification = List<Int>
 typealias AnnotatedSentence = Pair<String, CharsClassification>
@@ -41,7 +42,7 @@ class InvalidDataset(message: String) : RuntimeException(message)
  */
 fun readDataset(filename: String): Dataset {
 
-  val examples: JsonArray<*> = Parser().parse(filename) as JsonArray<*>
+  val examples: JsonArray<*> = Klaxon().parseJsonArray(File(filename).reader())
 
   @Suppress("UNCHECKED_CAST")
   return examples.map { example -> example as JsonArray<*>
