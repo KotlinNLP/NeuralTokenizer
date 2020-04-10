@@ -9,7 +9,7 @@ package com.kotlinnlp.neuraltokenizer.utils
 
 import com.beust.klaxon.JsonArray
 import com.beust.klaxon.Klaxon
-import com.kotlinnlp.utils.ExamplesIndices
+import com.kotlinnlp.utils.ShuffledIndices
 import com.kotlinnlp.utils.Shuffler
 import java.io.File
 
@@ -104,7 +104,7 @@ internal fun mergeDataset(dataset: Dataset): MergedDataset {
  */
 internal fun shuffleDataset(dataset: Dataset, shuffler: Shuffler): Dataset {
 
-  val exampleIndices = ExamplesIndices(size = dataset.size, shuffler = shuffler)
+  val exampleIndices = ShuffledIndices(size = dataset.size, shuffler = shuffler)
 
   return exampleIndices.map { i -> dataset[i] }
 }
