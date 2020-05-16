@@ -88,7 +88,7 @@ class NeuralTokenizer(
       this.processSegment(text = text, range = it)
     }
 
-    return this.sentences
+    return this.sentences.toList()
   }
 
   /**
