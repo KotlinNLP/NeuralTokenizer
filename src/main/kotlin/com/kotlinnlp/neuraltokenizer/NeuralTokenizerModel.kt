@@ -73,7 +73,7 @@ class NeuralTokenizerModel(
     inputType = LayerType.Input.Dense,
     inputSize = charEmbeddingsSize + addingFeaturesSize,
     hiddenSize = hiddenSize,
-    hiddenActivation = Tanh(),
+    hiddenActivation = Tanh,
     recurrentConnectionType = hiddenConnectionType)
 
   /**
