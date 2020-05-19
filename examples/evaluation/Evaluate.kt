@@ -11,6 +11,7 @@ import com.kotlinnlp.neuraltokenizer.*
 import com.kotlinnlp.neuraltokenizer.helpers.EvaluationStats
 import com.kotlinnlp.neuraltokenizer.helpers.Evaluator
 import com.kotlinnlp.neuraltokenizer.utils.readDataset
+import com.xenomachina.argparser.mainBody
 import java.io.File
 import java.io.FileInputStream
 
@@ -19,7 +20,7 @@ import java.io.FileInputStream
  *
  * Launch with the '-h' option for help about the command line arguments.
  */
-fun main(args: Array<String>) {
+fun main(args: Array<String>) = mainBody {
 
   val parsedArgs = CommandLineArguments(args)
 
