@@ -13,7 +13,7 @@ import com.kotlinnlp.neuraltokenizer.helpers.Trainer
 import com.kotlinnlp.neuraltokenizer.helpers.Evaluator
 import com.kotlinnlp.neuraltokenizer.utils.Dataset
 import com.kotlinnlp.neuraltokenizer.utils.readDataset
-import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
+import com.kotlinnlp.simplednn.core.functionalities.updatemethods.radam.RADAMMethod
 import com.kotlinnlp.simplednn.core.layers.LayerType
 import com.kotlinnlp.utils.Shuffler
 import com.xenomachina.argparser.mainBody
@@ -47,9 +47,9 @@ fun main(args: Array<String>) = mainBody {
     model = model,
     modelFilename = parsedArgs.modelPath,
     optimizer = NeuralTokenizerOptimizer(
-      charsEncoderUpdateMethod = ADAMMethod(stepSize = 0.001),
-      boundariesClassifierUpdateMethod = ADAMMethod(stepSize = 0.0001),
-      embeddingsUpdateMethod = ADAMMethod(stepSize = 0.001)),
+      charsEncoderUpdateMethod = RADAMMethod(stepSize = 0.001),
+      boundariesClassifierUpdateMethod = RADAMMethod(stepSize = 0.0001),
+      embeddingsUpdateMethod = RADAMMethod(stepSize = 0.001)),
     dataset = trainingSet,
     batchSize = 100,
     epochs = parsedArgs.epochs,

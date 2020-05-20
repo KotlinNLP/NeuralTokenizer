@@ -9,7 +9,7 @@ package com.kotlinnlp.neuraltokenizer
 
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.UpdateMethod
 import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adagrad.AdaGradMethod
-import com.kotlinnlp.simplednn.core.functionalities.updatemethods.adam.ADAMMethod
+import com.kotlinnlp.simplednn.core.functionalities.updatemethods.radam.RADAMMethod
 import com.kotlinnlp.simplednn.core.optimizer.ParamsOptimizer
 
 /**
@@ -20,8 +20,8 @@ import com.kotlinnlp.simplednn.core.optimizer.ParamsOptimizer
  * @param embeddingsUpdateMethod the update method for the embeddings (AdaGrad is default)
  */
 class NeuralTokenizerOptimizer(
-  charsEncoderUpdateMethod: UpdateMethod<*> = ADAMMethod(stepSize = 0.001),
-  boundariesClassifierUpdateMethod: UpdateMethod<*> = ADAMMethod(stepSize = 0.001),
+  charsEncoderUpdateMethod: UpdateMethod<*> = RADAMMethod(stepSize = 0.001),
+  boundariesClassifierUpdateMethod: UpdateMethod<*> = RADAMMethod(stepSize = 0.001),
   embeddingsUpdateMethod: UpdateMethod<*> = AdaGradMethod(learningRate = 0.01)
 ) {
 
