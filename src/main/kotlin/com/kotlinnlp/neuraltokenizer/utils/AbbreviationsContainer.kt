@@ -7,6 +7,8 @@
 
 package com.kotlinnlp.neuraltokenizer.utils
 
+import com.kotlinnlp.utils.getResourceAsStream
+
 /**
  * A container of common abbreviations read from a given file.
  *
@@ -31,7 +33,7 @@ class AbbreviationsContainer(resPath: String) {
    */
   private fun readAbbreviations(resPath: String): Set<String> {
 
-    val lines = this.javaClass.getResourceAsStream(resPath).reader().readText().split("\n")
+    val lines = getResourceAsStream(resPath).reader().readText().split("\n")
     val abbreviations = mutableSetOf<String>()
 
     lines.forEach { line -> abbreviations.add(line) }

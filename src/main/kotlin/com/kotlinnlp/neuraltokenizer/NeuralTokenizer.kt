@@ -153,13 +153,13 @@ class NeuralTokenizer(
    */
   private fun processSegment(text: String, range: IntRange) {
 
-    val charsClassification = this.classifyChars(text = text, start = range.start, length = range.count())
+    val charsClassification = this.classifyChars(text = text, start = range.first, length = range.count())
     val prevSentencesCount: Int = this.sentences.size
     val sentencePrevTokensCount: Int = this.curSentenceTokens.size
 
     charsClassification.forEachIndexed { i, charClassification ->
 
-      val textIndex: Int = range.start + i
+      val textIndex: Int = range.first + i
 
       this.processChar(
         char = text[textIndex],
@@ -318,7 +318,7 @@ class NeuralTokenizer(
 
     if (this[focusIndex] == '.' && focusIndex > 0 && langCode in abbreviations) {
 
-      val langAbbreviations: AbbreviationsContainer = abbreviations[langCode]!!
+      val langAbbreviations: AbbreviationsContainer = abbreviations.getValue(langCode)
 
       val firstUsefulCharIndex: Int = focusIndex - minOf(focusIndex, langAbbreviations.maxLength - 1)
       var cadidateStart = focusIndex - 1 // the start index of the candidate abbreviation
