@@ -15,6 +15,7 @@ import com.kotlinnlp.simplednn.helpers.Evaluator
 import com.kotlinnlp.utils.Timer
 import com.kotlinnlp.utils.stats.MetricCounter
 import java.lang.RuntimeException
+import kotlin.math.pow
 
 /**
  * Helper for the evaluation of a [NeuralTokenizerModel].
@@ -61,7 +62,7 @@ class Evaluator(
       tokens = this.buildMetric(outputElements = outputTokens, goldElements = goldTokens),
       sentences = this.buildMetric(outputElements = outputSentences, goldElements = goldSentences)
     ).apply {
-      accuracy = tokens.f1Score * Math.pow(sentences.f1Score, 0.5)
+      accuracy = tokens.f1Score * sentences.f1Score.pow(0.5)
     }
   }
 

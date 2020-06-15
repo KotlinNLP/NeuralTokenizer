@@ -200,8 +200,8 @@ class Trainer(
 
     val segmentClassification: List<DenseNDArray> = this.tokenizer.classifyChars(
       text = this.mergedDataset.fullText,
-      start = segmentRange.start,
-      length = segmentRange.count())
+      start = segmentRange.first,
+      length = segmentRange.last - segmentRange.first + 1)
 
     this.backward(segmentClassification)
 
