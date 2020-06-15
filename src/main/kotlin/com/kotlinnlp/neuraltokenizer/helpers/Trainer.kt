@@ -27,7 +27,8 @@ import java.io.FileOutputStream
  * @param optimizer the parameters optimizers wrapper
  * @param evaluator the helper for the evaluation (default null)
  * @param shuffler used to shuffle the examples before each epoch (with pseudo random by default)
- * @param useDropout whether to apply the dropout during the forward (default = false)
+ * @param charsDropout the probability of dropout of the chars encoding (default 0.0)
+ * @param boundariesDropout the probability of dropout of the boundaries classification (default 0.0)
  * @param verbose whether to print info about the training progress and timing (default = true)
  */
 class Trainer(
@@ -39,7 +40,8 @@ class Trainer(
   private val optimizer: NeuralTokenizerOptimizer,
   evaluator: Evaluator,
   private val shuffler: Shuffler = Shuffler(),
-  useDropout: Boolean = false,
+  charsDropout: Double = 0.0,
+  boundariesDropout: Double = 0.0,
   verbose: Boolean = true
 ) : Trainer<AnnotatedSentence>(
   modelFilename = modelFilename,
@@ -55,7 +57,10 @@ class Trainer(
   /**
    * The neural tokenizer built with the given model.
    */
-  private val tokenizer = NeuralTokenizer(model = this.model, useDropout = useDropout)
+  private val tokenizer = NeuralTokenizer(
+    model = this.model,
+    charsDropout = charsDropout,
+    boundariesDropout = boundariesDropout)
 
   /**
    * The gold classification of the current segment.

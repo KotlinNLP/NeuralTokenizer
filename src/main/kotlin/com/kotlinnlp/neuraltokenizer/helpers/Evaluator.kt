@@ -36,7 +36,7 @@ class Evaluator(
   /**
    * The tokenizer.
    */
-  private val tokenizer = NeuralTokenizer(model = model, useDropout = false)
+  private val tokenizer = NeuralTokenizer(model)
 
   /**
    * Overridden for inheritance but replaced by the following method.

@@ -54,8 +54,7 @@ fun main(args: Array<String>) = mainBody {
     batchSize = 100,
     epochs = parsedArgs.epochs,
     evaluator = Evaluator(model = model, dataset = validationSet),
-    shuffler = Shuffler(),
-    useDropout = true)
+    shuffler = Shuffler())
 
   println("\n-- MODEL")
   println(model)
